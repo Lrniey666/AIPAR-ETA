@@ -1,0 +1,91 @@
+# 實驗室點餐系統 AIPAR ETA — 本機／校內伺服器容器編排
+# 使用 Compose Specification（不要加過時的 version 欄）
+name: aipar-eta
+
+services:
+  postgres:
+    image: postgres:18.6-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?請在 .env 設定 POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?請在 .env 設定 POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?請在 .env 設定 POSTGRES_PASSWORD}
+      TZ: Asia/Taipei
+    volumes:
+      # PostgreSQL 18+ 官方映像把資料目錄改掛在 /var/lib/postgresql
+      - postgres_data:/var/lib/postgresql
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      APP_HOST: 0.0.0.0
+      APP_PORT: ${APP_PORT:-3000}
+      TZ: Asia/Taipei
+    ports:
+      - "${APP_PORT:-3000}:${APP_PORT:-3000}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["node", "src/web.ts"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+(process.env.APP_PORT||3000)+'/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      BOT_HEALTH_PORT: ${BOT_HEALTH_PORT:-3001}
+      TZ: Asia/Taipei
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["node", "src/bot.ts"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+(process.env.BOT_HEALTH_PORT||3001)+'/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    stop_grace_period: 10s
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: aipar-eta-net

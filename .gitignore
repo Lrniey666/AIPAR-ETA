@@ -1,0 +1,22 @@
+# ---------------- 機敏設定 ----------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ---------------- 相依與建置產物 ----------------
+node_modules/
+dist/
+coverage/
+*.log
+npm-debug.log*
+
+# ---------------- Docker 本機資料（若改 bind mount） ----------------
+.docker-data/
+
+# ---------------- 作業系統／編輯器 ----------------
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
