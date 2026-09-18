@@ -9,6 +9,7 @@ Compose 專案名稱：`aipar-eta`
 | 服務 | 映像／建置 | 對外埠 | 職責 |
 | --- | --- | --- | --- |
 | `postgres` | `postgres:18.6-alpine` | `127.0.0.1:5432` | 主資料庫。只綁本機，不對校園網開放。 |
+| `ocr` | `aipar-eta:ocr`（本倉 `ocr/Dockerfile`） | `127.0.0.1:8868` | 菜單對帳 OCR（PP-OCRv6 small ONNX）。權重在 `ocr/models/`。 |
 | `web` | `aipar-eta:app`（本倉 `Dockerfile`） | `${APP_PORT:-3000}` | 網站／API。校內裝置可連這一個埠。啟動 `src/web.ts`。 |
 | `bot` | 同上；啟動 `src/bot.ts` | 無對外埠 | Discord bot。只對內做健康檢查。 |
 
@@ -18,6 +19,7 @@ Compose 專案名稱：`aipar-eta`
 資料卷：`postgres_data` → 容器內 `/var/lib/postgresql`（PostgreSQL 18+ 官方映像的新預設路徑）
 
 `web` 與 `bot` 進入容器後，`POSTGRES_HOST` 一律覆寫成 `postgres`，避免誤用本機迴環位址。
+`bot` 的 `OCR_BASE_URL` 一律覆寫成 `http://ocr:8868`（同 Compose 網路），**不要填 127.0.0.1**——那會指到 bot 容器自己。本機直接跑 `npm run start:bot` 才用 `http://127.0.0.1:8868`。
 
 兩個服務啟動時都會自己跑一次資料庫遷移（`src/db/migrate.ts`），不需要額外的遷移步驟。
 
@@ -27,7 +29,8 @@ Compose 專案名稱：`aipar-eta`
 - 映像基底：`node:24-bookworm-slim`，以映像內建的非 root 使用者 `node` 執行。
 - 時區：`Asia/Taipei`。
 - 編排檔：`compose.yaml`（Compose Specification，不含過時的 `version` 欄）。
-- 相依只有 `pg` 與 `discord.js`；LLM 與 OCR 一律用內建 `fetch` 打 HTTP 端點，不引 SDK。
+- 應用映像相依只有 `pg` 與 `discord.js`；LLM 與 OCR 客戶端一律用內建 `fetch` 打 HTTP，不引 SDK。
+- OCR sidecar（`ocr/`）另用 `onnxruntime-node` 1.30.0 與 `sharp` 0.35.4 跑 PP-OCRv6 small；**不要把這兩個套件裝進 bot 映像**。
 - 映像會 `COPY logo ./logo`：網站的 `/assets/` 與 Discord Embed 的縮圖都從那裡讀。
 
 ## 環境變數
@@ -54,18 +57,20 @@ Compose 專案名稱：`aipar-eta`
 | `LOCAL_LLM_BASE_URL` / `LOCAL_LLM_MODEL` | | 本機模型保底（Ollama 等），留空＝不啟用 |
 | `OCR_BASE_URL` | | 菜單對帳 OCR（PP-OCRv6 small）的服務位址，留空＝整段略過 |
 | `OCR_PATH` / `OCR_API_KEY` / `OCR_MODEL` | | 端點路徑（預設 `/ocr`）、金鑰、模型名稱 |
-| `OCR_TIMEOUT_MS` / `OCR_MIN_SCORE` | | 逾時（預設 20000）與信心門檻（預設 0.6） |
+| `OCR_TIMEOUT_MS` / `OCR_MIN_SCORE` | | 逾時（程式預設 20000，Compose 覆寫 60000）與信心門檻（預設 0.6） |
 
-**OCR 服務要自己另外起，不要跑在 `bot` 容器裡。** 實驗室機器效能普通（AGENTS.md §6），
-容器裡跑辨識會拖垮 Discord 互動的回應時間。線上格式與回應形狀見 `SPEC/llm-gateway.md` §菜單 OCR 對帳。
+**OCR 不要跑在 `bot` 容器裡**，但本倉已提供獨立的 `ocr` 服務（`ocr/`，權重在 `ocr/models/`）。
+`docker compose up` 會一起啟動。線上格式見 `SPEC/llm-gateway.md` §菜單 OCR 對帳。
+權重遺失時在 `ocr/` 執行 `node scripts/fetch-models.ts`（用 RapidOCR 的 PyPI 套件抽出 ONNX，不讀研究倉路徑）。
 
 ## 驗證
 
 | 指令 | 內容 | 需要什麼 |
 | --- | --- | --- |
 | `npm run typecheck` | 型別檢查 | — |
-| `npm test` | 53 項離線測試（金額、菜單解析、OCR 版面與對帳、點餐與取消、債務收斂、LLM 換手、路由與外框） | — |
+| `npm test` | 77 項離線測試（金額、菜單解析、OCR 版面與對帳、OCR sidecar 契約、點餐與取消、債務收斂、接地防幻覺、記憶擷取、LLM 換手、路由與外框） | — |
 | `npm run smoke` | 端到端：建檔→菜單→揪團→點餐→結算→帳務，跑完自行清資料 | 資料庫 |
+| `npm run route:check` | 拿真實資料庫跑一遍自然語言路由決策，確認該擋在模型前面的還擋著 | 資料庫 |
 | `npm run llm:check` | 每家 LLM 供應商實際打一次 | 金鑰、外網 |
 | `npm run register` | 重新註冊斜線指令 | Discord 權杖 |
 

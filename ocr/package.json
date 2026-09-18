@@ -1,0 +1,17 @@
+{
+  "name": "aipar-eta-ocr",
+  "private": true,
+  "type": "module",
+  "description": "AIPAR ETA 菜單對帳 OCR（PP-OCRv6 small，獨立容器）",
+  "engines": {
+    "node": ">=24.12.0"
+  },
+  "scripts": {
+    "start": "node src/server.ts",
+    "fetch-models": "node scripts/fetch-models.ts"
+  },
+  "dependencies": {
+    "onnxruntime-node": "1.30.0",
+    "sharp": "0.35.4"
+  }
+}

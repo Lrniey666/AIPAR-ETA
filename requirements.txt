@@ -1,5 +1,5 @@
 # AIPAR ETA — Python 相依清單
-# 最後核對：2026-09-18（台北時間，對齊 CHANGELOG 0.2.0）
+# 最後核對：2026-09-18（台北時間，對齊 CHANGELOG Unreleased）
 #
 # 現況：執行時期為 Node.js 24 Active LTS，應用程式在 src/*.ts。
 # 倉庫內沒有 Python 模組，也沒有任何 pip 套件被 import。
@@ -9,4 +9,6 @@
 #   執行：pg ^8.23.0、discord.js ^14.27.0
 #   開發：typescript ^5.9.2、@types/node ^24.3.1、@types/pg ^8.15.5
 #
-# 後續若加入菜單 OCR 等 Python 元件，再把實際 import 的套件（含版本）寫入此檔。
+# 菜單 OCR 是 Node sidecar（`ocr/`，onnxruntime-node + sharp），不是 pip 套件。
+# 權重遺失時 `ocr/scripts/fetch-models.ts` 會暫時用 pip 裝 rapidocr 只為抽出 ONNX，
+# 抽出後即可移除，正式執行不依賴 Python。

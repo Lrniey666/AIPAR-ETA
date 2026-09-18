@@ -39,10 +39,10 @@
 
 ---
 
-Lunch orders should not live across ten Discord messages. AIPAR ETA keeps restaurants, forum group-buys, and the ledger in one system: **writes go through the Discord bot**, **reads go through the campus website**, and **state lives in PostgreSQL**. Natural language and menu-image recognition use **free LLM APIs only**. Menu-reconciliation OCR (PP-OCRv6 small) is optional and skipped when unset. With no keys at all, buttons and dropdowns still work.
+Lunch orders should not live across ten Discord messages. AIPAR ETA keeps restaurants, forum group-buys, and the ledger in one system: **writes go through the Discord bot**, **reads go through the campus website**, and **state lives in PostgreSQL**. Natural language and menu-image recognition use **free LLM APIs only**. Menu-reconciliation OCR (PP-OCRv6 small) is this repo’s `ocr/` sidecar and starts with Compose; it is skipped only when `OCR_BASE_URL` is unset *and* you are not using Compose. With no keys at all, buttons and dropdowns still work.
 
-> **Status (0.2.0 + Unreleased).** The three product features shipped in 0.2.0. This round follows `PLAN/AEPARC_EAT_Revise_1.md`: vertical-menu OCR, plain-language cancel and ledger queries, who-owes-whom, and a themed dashboard.
-> 53 offline tests and the local website pages have passed. **Live Discord use has not been signed off.** The command table changed — run `npm run register` after deploy.
+> **Status (0.2.0 + Unreleased).** The three product features shipped in 0.2.0. This round follows `PLAN/AEPARC_EAT_Revise_1.md`: in-repo OCR, plain-language cancel / ledger / recommend, who-owes-whom, conversation memory, anti-hallucination, and a themed dashboard.
+> **77** offline tests, `npm run smoke`, `npm run route:check` and the local website pages have passed. **Live Discord use has not been signed off** (including `/memory`). The command table changed — run `npm run register` after deploy.
 
 English in this project is **British English**. Discord users whose client language is Chinese (Traditional or Simplified) see Traditional Chinese; everyone else sees English.
 
@@ -76,7 +76,9 @@ English in this project is **British English**. Discord users whose client langu
 
 | Also | Why |
 | --- | --- |
-| **Vertical menus are readable** | An optional PP-OCRv6 small pass works out the layout and reading order first, then cross-checks the model's draft and flags the lines that did not match. |
+| **Vertical menus are readable** | This repo’s `ocr/` sidecar (PP-OCRv6 small ONNX) works out layout and reading order first, then cross-checks the model's draft and flags lines that did not match. Weights live in `ocr/models/`. |
+| **It will not invent a menu** | Anything answerable from the database never reaches the model: a known restaurant gets its menu embed, and one without a menu gets an honest "not added yet". If the model does reply, bullet lists and prices are caught and discarded. |
+| **It remembers** | Short term, the recent conversation in this channel; long term, whatever you explicitly asked it to remember (`/memory`). It also knows which server, channel and person it is talking to. |
 | **Read-only campus site** | No public domain; a single write path (Discord) keeps authorisation simple. |
 | **Themes and accessibility** | The theme toggle uses a View Transitions circular wipe; with reduce-motion set, there is no animation at all. |
 | **Rules first, model second** | If a rule matches, the LLM is skipped. Free quotas last longer and results stay predictable. |
@@ -113,10 +115,27 @@ Press Order (quantity + items), or type   “two egg pancakes and a soya milk”
         ↓
 “cancel the soya milk” / summary says Closed after the deadline
         ↓
-/settle   → /ledger who · /ledger mine · /website
+/settle   → /ledger who · /ledger mine · /memory mine · /website
 ```
 
 Website routes: `/` dashboard, `/restaurants/:id` menu, `/sessions/:id` that round’s summary, `/ledger/:guild-id` who owes whom.
+
+### Talk to it
+
+Mention the bot and ask in plain language. **Anything the database can answer never reaches the model:**
+
+```text
+“what’s good at Si Hai soya milk”     → no menu on file → says so (will not invent dishes)
+“anywhere I can get tofu hotpot”      → looks up menu_items → real shops and prices
+“recommend something” / “pick for me” → samples dishes that actually exist
+“give me the noodle place”            → asks “do you mean Lao Yu noodles?” first
+“how much do I owe” / “who owes me”   → ledger embed
+“remember I don’t eat beef”           → long-term memory
+“do you have memory?”                 → the programme answers how much it remembers
+small talk                            → the model may reply; the output gate still runs
+```
+
+After changing the natural-language routes, run `npm run route:check` against a real database.
 
 ## Architecture
 
@@ -127,11 +146,11 @@ flowchart LR
   B --> P[(PostgreSQL 18.6)]
   W --> P
   B --> L[Free LLM APIs<br/>Groq / Gemini / Mistral]
-  B -.-> O[PP-OCRv6 small<br/>optional]
+  B --> O[ocr container<br/>PP-OCRv6 small]
   L -.-> B
 ```
 
-Both entry points share the database and **never write SQL themselves**: `bot` and `web` call `db/` and `domain/` only. The LLM gateway speaks the OpenAI-compatible wire format. Switching provider means changing `base_url`, the key, and the model id — no LLM SDK is imported. OCR is a separate HTTP service; **do not run it inside the bot container**.
+Both entry points share the database and **never write SQL themselves**: `bot` and `web` call `db/` and `domain/` only. The LLM gateway speaks the OpenAI-compatible wire format. Switching provider means changing `base_url`, the key, and the model id — no LLM SDK is imported. OCR is this repo’s `ocr/` sidecar (`aipar-eta:ocr`); **do not run it inside the bot process**. `web` and `bot` share the `aipar-eta:app` image.
 
 | Layer | Directory | May depend on |
 | --- | --- | --- |
@@ -158,7 +177,7 @@ cp .env.example .env
 ```
 
 Set at least `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD`. Discord tokens and LLM keys can wait: without them the bot stays on its health port, and the website plus database still start.
-Set `PUBLIC_BASE_URL` (for example `http://10.0.0.12:3000`) if embeds and `/website` should carry a link. Set `OCR_BASE_URL` for menu reconciliation; leave it empty to skip that step entirely.
+Set `PUBLIC_BASE_URL` (for example `http://10.0.0.12:3000`) if embeds and `/website` should carry a link. Compose overwrites the bot’s `OCR_BASE_URL` to `http://ocr:8868`; only `npm run start:bot` on the host needs `http://127.0.0.1:8868`. If the weights are missing, run `node scripts/fetch-models.ts` inside `ocr/`.
 
 ### 2. Compose
 
@@ -169,7 +188,7 @@ docker compose up --build -d
 docker compose ps
 ```
 
-All three services should be `healthy`. Open <http://127.0.0.1:3000/health> — you should see `ok: true` and the database time.
+All four services (`postgres`, `ocr`, `web`, `bot`) should be `healthy`. Open <http://127.0.0.1:3000/health> — you should see `ok: true` and the database time. The OCR probe is <http://127.0.0.1:8868/health>.
 
 ### 3. Discord (when you want the bot)
 
@@ -182,15 +201,16 @@ All three services should be `healthy`. Open <http://127.0.0.1:3000/health> — 
 /setup role   role:@lunch
 ```
 
-**The command table changed this round** (`/order` removed, `/website` added, the deadline is now a number of minutes). After deploy, run `npm run register` (or `docker compose exec bot node src/scripts/register-commands.ts`).
+**The command table changed this round** (`/order` removed, `/website` and `/memory` added, the deadline is now a number of minutes). After deploy, run `npm run register` (or `docker compose exec bot node src/scripts/register-commands.ts`).
 
 ### 4. Everyday commands
 
 | Command | What it does | Needs |
 | --- | --- | --- |
-| `npm run check` | typecheck + 53 offline tests | — |
+| `npm run check` | typecheck + 77 offline tests | — |
 | `npm test` | tests only | — |
 | `npm run smoke` | restaurant → menu → group buy → order → settle → ledger, then cleans up | database |
+| `npm run route:check` | run the natural-language router against a real database | database |
 | `npm run llm:check` | one live call per provider | keys, network |
 | `npm run register` | re-register slash commands | Discord token |
 
@@ -211,18 +231,19 @@ AIPAR-ETA/
 │   ├── llm/                providers, failover, task prompts, OCR client
 │   ├── bot/                commands, components, messages, i18n
 │   ├── web/                pages and read-only JSON
-│   └── scripts/            smoke, llm-check, register-commands
+│   └── scripts/            smoke, llm-check, register-commands, route-check
 ├── logo/                   brand files for `/assets/` and embed thumbnails
 ├── test/                   node:test (also a behaviour spec)
 ├── SPEC/                   architecture and data contracts
 ├── PLAN/                   product draft, revise list, sample menu photos
 ├── docs/                   this English README, contributing, artwork
-├── compose.yaml            postgres / web / bot
+├── compose.yaml            postgres / ocr / web / bot
+├── ocr/                    PP-OCRv6 small sidecar (weights in models/)
 ├── DEPLOY.md               campus server
 └── CHANGELOG.md            history (Traditional Chinese)
 ```
 
-The root `requirements.txt` lists no pip packages on purpose. This is not a Python project; runtime dependencies are in `package.json`.
+The root `requirements.txt` lists no pip packages on purpose. This is not a Python project. App dependencies are in the root `package.json`; the OCR sidecar has its own `ocr/package.json` (`onnxruntime-node`, `sharp`) and those must not go into the bot image.
 
 ## Technical details
 
@@ -236,6 +257,7 @@ The root `requirements.txt` lists no pip packages on purpose. This is not a Pyth
 | `/groupbuy` | `/揪團` | open a forum post; the deadline is a number of minutes |
 | `/settle` | `/結算` | settle and write the ledger |
 | `/ledger` | `/帳務` | mine / all / who / pay |
+| `/memory` | `/記憶` | mine / save / forget |
 | `/help` | `/說明` | how to use |
 | `/website` | `/網站` | a link button to the site |
 | `/setup` | `/設定` | forum channel and notify role (Manage Server) |
@@ -283,7 +305,8 @@ JSON amounts are in **New Taiwan dollars**, not cents. Non-GET methods return 40
 | `*_MODEL` / `*_VISION_MODEL` | | a key without a model id is skipped on purpose — never guess |
 | `LLM_ALLOW_METERED` | | `true` enables the metered provider (iAI); off by default |
 | `PUBLIC_BASE_URL` | | the site's address; used for embed logos and the `/website` button |
-| `OCR_BASE_URL` | | menu cross-check OCR (PP-OCRv6 small); leave empty to skip it entirely |
+| `OCR_BASE_URL` | | menu cross-check OCR. Compose overwrites this to `http://ocr:8868` |
+| `OCR_TIMEOUT_MS` | | Compose sets 60000; the code default is 20000 |
 | `LOCAL_LLM_BASE_URL` | | local fallback; do not run a local model inside the container |
 
 See [`.env.example`](../.env.example). Never commit `.env` or bake it into the image.
@@ -295,9 +318,9 @@ See [`.env.example`](../.env.example). Never commit `.env` or bake it into the i
 
 Order of attempt: Groq (text) → Gemini (vision) → Mistral → local. Metered iAI stays off unless `LLM_ALLOW_METERED=true`.
 
-- An **empty reply counts as failure** and the next provider is tried (Gemini’s free tier often spends `max_tokens` on thinking).
+- An **empty reply, or JSON that cannot be parsed**, counts as failure and the next provider is tried (Gemini’s free tier often spends `max_tokens` on thinking, or returns unparseable text).
 - 429 / 5xx: retry the same key once, then fail over. 401 / 403: skip that key immediately.
-- Vision and text models are queued separately. `OCR_BASE_URL` turns on a PP-OCRv6 small cross-check; it only flags lines, it never rewrites the draft.
+- Vision and text models are queued separately. Compose runs this repo’s PP-OCRv6 small sidecar first as a cross-check; it only flags lines, it never rewrites the draft. `menu-vision` / `menu-text` set `require_json`.
 
 Hard rules: unit prices always come from `menu_items`; a matching rule means the model is not called. Details: [`SPEC/llm-gateway.md`](../SPEC/llm-gateway.md). Run `npm run llm:check` before going live — a name on a price list is not the same as an ID you can actually call.
 
@@ -309,9 +332,8 @@ Hard rules: unit prices always come from `menu_items`; a matching rule means the
 - Node.js 24 Active LTS (Krypton), ≥ 24.12, type stripping, no build step
 - PostgreSQL 18.6 (`postgres:18.6-alpine`; 19 was still beta at the time)
 - discord.js 14.27, `pg` 8.23
-- Image: `node:24-bookworm-slim`, non-root `node`, timezone `Asia/Taipei`; `COPY logo ./logo`
-- Compose file: `compose.yaml` (Compose Specification; no obsolete `version` key)
-- Postgres port bound to `127.0.0.1` only — not on the campus network
+- Images: `web` / `bot` share `aipar-eta:app` (`node:24-bookworm-slim`, non-root `node`, `COPY logo ./logo`); OCR builds `aipar-eta:ocr`
+- Compose file: `compose.yaml` (Compose Specification; no obsolete `version` key); `postgres` and `ocr` ports bound to `127.0.0.1`
 - Brand colours from the mark: gold `#eabf29`, blue `#259fc8` (website and embeds share them)
 
 </details>

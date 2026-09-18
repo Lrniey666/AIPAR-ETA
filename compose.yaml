@@ -12,6 +12,32 @@ x-app-image: &app-image
     dockerfile: Dockerfile
 
 services:
+  ocr:
+    image: aipar-eta:ocr
+    pull_policy: build
+    build:
+      context: ./ocr
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Taipei
+      OCR_HOST: 0.0.0.0
+      OCR_PORT: 8868
+    ports:
+      - "127.0.0.1:8868:8868"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8868/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
   postgres:
     image: postgres:18.6-alpine
     restart: unless-stopped
@@ -70,8 +96,13 @@ services:
       POSTGRES_HOST: postgres
       BOT_HEALTH_PORT: ${BOT_HEALTH_PORT:-3001}
       TZ: Asia/Taipei
+      # 容器內一律打同網路的 ocr 服務；不要填 127.0.0.1（那是 bot 容器自己）。
+      OCR_BASE_URL: http://ocr:8868
+      OCR_TIMEOUT_MS: "60000"
     depends_on:
       postgres:
+        condition: service_healthy
+      ocr:
         condition: service_healthy
     command: ["node", "src/bot.ts"]
     healthcheck:

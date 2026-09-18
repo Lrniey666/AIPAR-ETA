@@ -90,6 +90,41 @@ export async function search_restaurants(pool: Db, keyword: string, limit = 10):
   return scored.slice(0, limit).map((entry) => entry.row);
 }
 
+export type RestaurantWithMenu = Restaurant & {
+  /** 目前上線的菜單版本；null＝尚無菜單。 */
+  menu_version: number | null;
+  item_count: number;
+};
+
+/**
+ * 餐廳連同「有沒有上線菜單」一起撈。
+ *
+ * 自然語言回答需要這一欄：只給店名清單的話，模型看到店名就會自己想像它賣什麼
+ * （實際發生過）。「尚無菜單」是要明講的事實，不是可以省略的空值，
+ * 所以用一次 LEFT JOIN 拿齊，不要讓呼叫端逐間補查。
+ */
+export async function list_restaurants_with_menu(
+  pool: Db,
+  limit = 50,
+): Promise<RestaurantWithMenu[]> {
+  const result = await pool.query<RestaurantWithMenu>(
+    `SELECT ${COLUMNS.split(",").map((column) => `r.${column.trim()}`).join(", ")},
+            m.version AS menu_version,
+            COALESCE((SELECT COUNT(*) FROM menu_items mi WHERE mi.menu_id = m.id), 0) AS item_count
+       FROM restaurants r
+       LEFT JOIN menus m ON m.restaurant_id = r.id AND m.status = 'active'
+      WHERE r.is_active
+      ORDER BY r.name
+      LIMIT $1`,
+    [limit],
+  );
+  return result.rows.map((row) => ({
+    ...row,
+    menu_version: row.menu_version === null ? null : Number(row.menu_version),
+    item_count: Number(row.item_count),
+  }));
+}
+
 export async function add_alias(pool: Db, id: number, alias: string): Promise<void> {
   const value = alias.trim();
   if (!value) {

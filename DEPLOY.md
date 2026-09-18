@@ -19,7 +19,7 @@ docker compose up --build -d
 docker compose ps
 ```
 
-三個服務都應為 `healthy`。資料庫遷移會在 `web` 與 `bot` 啟動時自動套用，不需要另外下指令。
+四個服務（`postgres`、`ocr`、`web`、`bot`）都應為 `healthy`。資料庫遷移會在 `web` 與 `bot` 啟動時自動套用，不需要另外下指令。OCR 權重在 `ocr/models/`，不讀專案外路徑。
 
 校內裝置連線：`http://<伺服器校內IP>:3000/`
 
@@ -29,8 +29,10 @@ docker compose ps
 
 ```bash
 curl http://127.0.0.1:3000/health          # 網站與資料庫
+curl http://127.0.0.1:8868/health          # OCR sidecar
 docker compose exec bot node -e "fetch('http://127.0.0.1:3001/health').then(r=>r.text()).then(console.log)"
 npm run llm:check                          # 各家 LLM 模型 ID 是否還打得通
+npm run route:check                        # 自然語言路由（需要資料庫）
 ```
 
 `bot` 的健康檢查會列出目前可用的 LLM 供應商，以及被略過的供應商與原因——

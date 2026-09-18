@@ -16,10 +16,11 @@
 
 `Unreleased` 再依 `PLAN/AEPARC_EAT_Revise_1.md` 修訂：菜單辨識加了 OCR 版面分析與對帳（為了讀直書菜單）、
 自然語言能取消點餐與查帳也能閒聊、按鈕點餐可選數量與逐項清除、帳務記得住「誰欠誰」、
-網站改版成儀表板加深淺色切換。
+網站改版成儀表板加深淺色切換。之後再補上對話記憶（短期／長期）、身分辨識，
+以及四道防幻覺（路由 → 事實區塊 → 系統提示 → 輸出守門）。
 
 **尚未驗證**：Discord 端的實際互動（需要把 bot 接上伺服器）。其餘皆已在本機實測，見 `CHANGELOG.md`。
-**指令表有增減（移除 `/點餐`、新增 `/網站`、`/揪團` 截止改整數分鐘），部署後要跑 `npm run register`。**
+**指令表有增減（移除 `/點餐`、新增 `/網站` 與 `/記憶`、`/揪團` 截止改整數分鐘），部署後要跑 `npm run register`。**
 
 **技術棧（以程式碼為準，2026-09-18 查證）**：
 
@@ -28,12 +29,12 @@
 | 執行期 | Node.js ≥ 24.12（type stripping 直接跑 `.ts`，無建置步驟） |
 | 語言 | TypeScript（`src/**/*.ts`，ESM，`import` 帶 `.ts` 副檔名） |
 | 資料庫 | PostgreSQL 18.6（`postgres:18.6-alpine`），遷移在 `src/db/sql/` |
-| 編排 | `compose.yaml`：`postgres`、`web`、`bot` |
+| 編排 | `compose.yaml`：`postgres`、`ocr`、`web`、`bot` |
 | HTTP | `node:http` 自寫路由＋伺服器端渲染（刻意不引網頁框架） |
 | Discord | discord.js 14.27 |
 | LLM | 自寫閘道，OpenAI 相容 wire format＋內建 `fetch`，**不引任何 LLM SDK** |
-| OCR | 選用的外掛 HTTP 服務（PP-OCRv6 small），菜單對帳用；沒設定就略過 |
-| 測試 | `node:test`（`test/*.test.ts`），53 項離線測試 |
+| OCR | 本倉 `ocr/` sidecar（PP-OCRv6 small ONNX）；Compose 預設接上，沒設 `OCR_BASE_URL` 才略過 |
+| 測試 | `node:test`（`test/*.test.ts`），77 項離線測試 |
 
 這不是 Python 專案。根目錄 `requirements.txt` 依現況不列 pip 套件，**執行相依以 `package.json` 為準**。`.cursorrules` 仍寫「Python 用 snake_case」——**變數／函式在本倉 TypeScript 同樣用 snake_case**（見 `load_config`、`summarise_orders`），類別與型別用 PascalCase。
 
@@ -87,7 +88,7 @@
 3. `npm run check`（型別檢查＋離線測試）要全綠
 4. 動到資料流：`npm run smoke`（需要資料庫）
 5. 動到 LLM 設定：`npm run llm:check`（需要金鑰）
-6. 基礎設施改動：`docker compose up --build -d` 後三服務 `healthy`；`GET /health` 含資料庫時間
+6. 基礎設施改動：`docker compose up --build -d` 後四服務 `healthy`；`GET /health` 含資料庫時間；`GET http://127.0.0.1:8868/health` 為 OCR
 
 ---
 
@@ -99,9 +100,11 @@
 | 資料表／遷移 | `data-model.md` | `src/db/sql/*.sql`、`src/db/migrate.ts` | 只新增遷移檔，不改已套用的 |
 | 資料存取 | `data-model.md` | `src/db/*.ts`（一張表一個模組） | 金額欄位一律 `*_cents` |
 | 菜單查詢／圖片辨識 | `bot-interactions.md`、`llm-gateway.md` | `src/bot/handlers/menu.ts`、`menu_upload.ts`、`src/bot/menu_flow.ts`、`src/llm/tasks/menu_extract.ts`、`src/domain/menu_draft.ts` | 草稿一定要人工確認才上線 |
-| 菜單 OCR 對帳 | `llm-gateway.md` | `src/llm/ocr.ts`、`src/domain/ocr_layout.ts`、`src/domain/menu_reconcile.ts` | 沒設定 `OCR_BASE_URL` 就整段略過；只標記不改資料 |
+| 菜單 OCR 對帳 | `llm-gateway.md` | `ocr/`（sidecar）、`src/llm/ocr.ts`、`src/domain/ocr_layout.ts`、`src/domain/menu_reconcile.ts` | Compose 預設 `OCR_BASE_URL=http://ocr:8868`；只標記不改資料 |
 | 揪團點餐／論壇貼文 | `bot-interactions.md` | `src/bot/handlers/session.ts`、`src/bot/session_flow.ts`、`src/domain/ordering.ts` | 價格永遠取自 `menu_items`；封單只走 `lock_session()` |
 | 自然語言點餐／取消 | `llm-gateway.md` | `src/llm/tasks/order_parse.ts`、`order_cancel.ts`、`src/bot/handlers/message_order.ts` | 規則優先、模型墊底；數量只從品名以外的殘字讀 |
+| 自然語言問答／防幻覺 | `llm-gateway.md` | `src/domain/grounding.ts`、`dish_query.ts`、`recommend.ts`、`src/bot/chat_context.ts`、`handlers/message_chat.ts` | 判準是「資料庫答得了嗎」，不是「跟吃有關就攔」；改完跑 `npm run route:check` |
+| 記憶（短期／長期） | `data-model.md` | `src/db/memory.ts`、`src/domain/memory_capture.ts`、`src/bot/handlers/memory.ts` | 長期記憶只記使用者明講的；模型不得寫入 |
 | 記帳／分攤／誰欠誰 | `data-model.md` | `src/bot/handlers/ledger.ts`、`src/domain/settlement.ts`、`src/domain/debts.ts`、`src/db/ledger.ts` | charge 對同場同人唯一；結餘與債務是兩件事 |
 | Discord 指令定義 | `bot-interactions.md` | `src/bot/commands/`（`options`／`catalogue`／`ordering`／`definitions`） | 改完跑 `npm run register` |
 | 按鈕／下拉互動 | `bot-interactions.md` | `src/bot/components.ts`、`components_order.ts`、`handlers/components.ts`、`session_components.ts`、`menu_components.ts` | custom id 上限 100 字元；點餐數量編在 id 裡 |
@@ -111,7 +114,7 @@
 | 免費 LLM／視覺閘道 | `llm-gateway.md` | `src/llm/providers.ts`、`gateway.ts`、`transport.ts` | 見 §6；不要猜模型 ID |
 | 網站頁面／API | `web-api.md` | `src/web/server.ts`、`routes/`、`render.ts`、`theme.ts`、`assets.ts` | 路由比對在 `routes/match.ts`，是純函式且有測試 |
 | 網站外觀／主題切換 | `web-api.md` | `src/web/theme.ts` | `prefers-reduced-motion` 要完全關掉動畫，不是縮短 |
-| Docker／映像 | `infrastructure.md` | `Dockerfile`、`compose.yaml` | 非 root `node`；時區 `Asia/Taipei`；勿在容器內跑本機 LLM |
+| Docker／映像 | `infrastructure.md` | `Dockerfile`、`ocr/Dockerfile`、`compose.yaml` | 非 root `node`；時區 `Asia/Taipei`；OCR 用獨立映像，勿塞進 bot |
 | 本機／校內部署說明 | — | `README.md`、`docs/README.en-GB.md`、`DEPLOY.md` | postgres 埠只綁 `127.0.0.1` |
 | 專案介紹文案 | — | `README.md`、`docs/README.en-GB.md`、`docs/assets/` | 繁中與英式英文對照；示意圖改完兩份 README 都要看 |
 
@@ -153,7 +156,7 @@ shared ← db ← domain ← llm ← bot
 | `README.md` | 繁中專案介紹、示範、本機啟動 | 第一次接觸 |
 | `docs/README.en-GB.md` | 英式英文介紹 | 英文讀者 |
 | `docs/README.md` | 說明文件索引 | 不知道該開哪一份時 |
-| `docs/presentations/` | 通用介紹簡報、講稿與專有名詞 | 口頭介紹專案時 |
+| `docs/presentations/` | 通用介紹簡報、講稿與技術專有名詞 | 口頭介紹專案時 |
 | `CONTRIBUTING.md` | 貢獻約定 | 要改程式或文件時 |
 | `DEPLOY.md` | 校內 24/7 伺服器 | 部署／備份 |
 | `CHANGELOG.md` | Keep a Changelog 2.0.0；未發布寫 `Unreleased` | 每次改完 |
@@ -223,7 +226,7 @@ shared ← db ← domain ← llm ← bot
 
 ```powershell
 Copy-Item .env.example .env
-npm run check            # 型別檢查＋29 項離線測試，不需要資料庫或金鑰
+npm run check            # 型別檢查＋77 項離線測試，不需要資料庫或金鑰
 docker compose up --build -d
 docker compose ps
 npm run smoke            # 端到端（需要資料庫）

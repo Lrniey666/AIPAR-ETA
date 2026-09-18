@@ -8,6 +8,7 @@
 // 各指令的實際定義分在 catalogue.ts（建檔類）與 ordering.ts（使用類）。
 
 import { menu_command, restaurant_command } from "./catalogue.ts";
+import { memory_command } from "./memory.ts";
 import type { Definition } from "./options.ts";
 import {
   groupbuy_command,
@@ -26,6 +27,7 @@ export const COMMAND_DEFINITIONS: Definition[] = [
   groupbuy_command,
   settle_command,
   ledger_command,
+  memory_command,
   help_command,
   website_command,
   setup_command,
@@ -33,6 +35,16 @@ export const COMMAND_DEFINITIONS: Definition[] = [
 
 /** 說明文與自然語言回覆引用指令名稱時，都從這裡取，避免各處寫死。 */
 export const COMMAND_NAMES = {
-  "zh-TW": ["/餐廳", "/菜單", "/揪團", "/結算", "/帳務", "/說明", "/網站", "/設定"],
-  "en-GB": ["/restaurant", "/menu", "/groupbuy", "/settle", "/ledger", "/help", "/website", "/setup"],
+  "zh-TW": ["/餐廳", "/菜單", "/揪團", "/結算", "/帳務", "/記憶", "/說明", "/網站", "/設定"],
+  "en-GB": [
+    "/restaurant",
+    "/menu",
+    "/groupbuy",
+    "/settle",
+    "/ledger",
+    "/memory",
+    "/help",
+    "/website",
+    "/setup",
+  ],
 } as const;

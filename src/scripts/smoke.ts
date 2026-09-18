@@ -5,6 +5,14 @@
 
 import { load_config } from "../config.ts";
 import { list_balances, list_debt_edges, record_entry } from "../db/ledger.ts";
+import {
+  clear_turns,
+  count_turns,
+  forget_all,
+  list_context_facts,
+  record_turn,
+  remember_fact,
+} from "../db/memory.ts";
 import { run_migrations } from "../db/migrate.ts";
 import { activate_menu, create_menu_version, list_menu_items } from "../db/menus.ts";
 import { add_order_line, create_session, list_order_lines } from "../db/orders.ts";
@@ -12,6 +20,8 @@ import { create_pool } from "../db/pool.ts";
 import { create_restaurant } from "../db/restaurants.ts";
 import { upsert_user } from "../db/users.ts";
 import { net_debts, simplify_debts } from "../domain/debts.ts";
+import { find_mentioned_restaurants } from "../domain/grounding.ts";
+import { capture_memory } from "../domain/memory_capture.ts";
 import { parse_menu_text } from "../domain/menu_draft.ts";
 import { summarise_orders } from "../domain/ordering.ts";
 import { settle_session } from "../domain/settlement.ts";
@@ -163,6 +173,52 @@ try {
     "帳務",
     balances.map((balance) => `${balance.display_name} ${format_cents(balance.balance_cents)}`).join("、"),
   );
+
+  // 接地：句子提到已建檔的店就要找得到——查不到才會掉進模型，那正是幻覺的入口。
+  const mentioned = find_mentioned_restaurants(`${restaurant.name}有甚麼好吃的`, [
+    { restaurant, menu_version: menu.version, item_count: items.length },
+  ]);
+  if (mentioned[0]?.restaurant.id !== restaurant.id) {
+    throw new Error("店名出現在句子裡卻比對不到");
+  }
+  step("接地", `「${restaurant.name}有甚麼好吃的」對到 ${mentioned[0].restaurant.name}`);
+
+  // 記憶：短期照頻道記，長期只記明講的。
+  const channel_id = `smoke-memory-${Date.now()}`;
+  await record_turn(pool, {
+    guild_id: GUILD_ID,
+    channel_id,
+    discord_user_id: "user-a",
+    display_name: "阿明",
+    role: "user",
+    content: "記住我不吃牛",
+  });
+  const captured = capture_memory("記住我不吃牛");
+  if (!captured) {
+    throw new Error("「記住我不吃牛」沒有被擷取成長期記憶");
+  }
+  await remember_fact(pool, {
+    guild_id: GUILD_ID,
+    scope: captured.scope,
+    subject_id: "user-a",
+    fact_key: captured.fact_key,
+    fact_value: captured.fact_value,
+    created_by: "smoke",
+  });
+
+  const facts = await list_context_facts(pool, GUILD_ID, "user-a", channel_id);
+  const turns = await count_turns(pool, channel_id);
+  if (facts.length !== 1 || turns !== 1) {
+    throw new Error(`記憶不如預期：長期 ${facts.length} 條、短期 ${turns} 句`);
+  }
+  step("記憶", `短期 ${turns} 句、長期「${facts[0]?.fact_value}」`);
+
+  await forget_all(pool, GUILD_ID, captured.scope, "user-a");
+  await clear_turns(pool, channel_id);
+  if ((await list_context_facts(pool, GUILD_ID, "user-a", channel_id)).length !== 0) {
+    throw new Error("忘記之後不該還留著");
+  }
+  step("忘記", "長期與短期都清乾淨");
 
   // 收尾：測試資料不留在庫裡
   await pool.query("DELETE FROM ledger_entries WHERE guild_id = $1", [GUILD_ID]);

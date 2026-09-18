@@ -40,10 +40,10 @@
 ---
 
 實驗室中午要點什麼、誰點了什麼、最後誰該付多少——這件事不該再散落在十則訊息裡。
-AIPAR ETA 把餐廳菜單、論壇揪團與帳本收進同一套系統：寫入走 Discord bot，查閱走校內網站，資料放 PostgreSQL。自然語言與菜單辨識只用**免費 LLM API**；菜單對帳 OCR（PP-OCRv6 small）是選用外掛，沒設定就略過。沒有金鑰時按鈕與下拉仍可點餐。
+AIPAR ETA 把餐廳菜單、論壇揪團與帳本收進同一套系統：寫入走 Discord bot，查閱走校內網站，資料放 PostgreSQL。自然語言與菜單辨識只用**免費 LLM API**。菜單對帳 OCR（PP-OCRv6 small）是本倉 `ocr/` sidecar，Compose 會一起啟動；沒設 `OCR_BASE_URL`（且不走 Compose）才略過。沒有金鑰時按鈕與下拉仍可點餐。
 
-> **現況（0.2.0 ＋ Unreleased）**　三個產品功能已落地；這一輪再依 `PLAN/AEPARC_EAT_Revise_1.md` 補上直書菜單對帳、自然語言取消／查帳、誰欠誰、網站儀表板與深淺色。
-> 離線測試 53 項與本機網站頁面已通過。**Discord 端的真人操作尚未驗收**；指令表有增減，部署後請跑 `npm run register`。
+> **現況（0.2.0 ＋ Unreleased）**　三個產品功能已落地；這一輪再依 `PLAN/AEPARC_EAT_Revise_1.md` 補上直書菜單對帳（本倉 OCR 容器）、自然語言取消／查帳／推薦、誰欠誰、對話記憶、防幻覺，以及網站儀表板與深淺色。
+> 離線測試 **77** 項、`npm run smoke`、`npm run route:check` 與本機網站頁面已通過。**Discord 端的真人操作尚未驗收**（含 `/記憶`）；指令表有增減，部署後請跑 `npm run register`。
 
 ## 功能
 
@@ -75,7 +75,9 @@ AIPAR ETA 把餐廳菜單、論壇揪團與帳本收進同一套系統：寫入�
 
 | 還有這些 | 為什麼這樣做 |
 | --- | --- |
-| **直書菜單也讀得出來** | 選用的 PP-OCRv6 small 先算出版面方向與閱讀順序，再交給視覺模型，最後回頭對帳標出沒核對上的行。 |
+| **直書菜單也讀得出來** | 本倉 `ocr/`（PP-OCRv6 small ONNX）先算出版面方向與閱讀順序，再交給視覺模型，最後回頭對帳標出沒核對上的行。權重在 `ocr/models/`。 |
+| **不會編菜單給你** | 判準是「資料庫答得了嗎」：答得了就用資料庫回（菜單、品項、推薦都來自 `menu_items`），答不了才交給模型，而且回完還要過一次守門。 |
+| **記得住** | 短期記得這個頻道最近的對話，長期記得你明講要它記的事（`/記憶`），也認得出伺服器、頻道與是誰在問。 |
 | **校內網站唯讀** | 沒有公有網域；寫入只留一條授權路徑（Discord）。 |
 | **深淺色與無障礙** | 主題切換走 View Transitions 的圓形遮罩；系統設為減少動態時完全不做動畫。 |
 | **規則優先、模型墊底** | 對得到就不打 LLM，省免費層配額，結果也比較可預測。 |
@@ -112,10 +114,27 @@ AIPAR ETA 把餐廳菜單、論壇揪團與帳本收進同一套系統：寫入�
         ↓
 「取消豆漿」／截止後顯示「截止」
         ↓
-/結算　→　/帳務 誰欠誰　·　/帳務 我的　·　/網站
+/結算　→　/帳務 誰欠誰　·　/帳務 我的　·　/記憶 我的　·　/網站
 ```
 
 網站對應頁面：`/` 儀表板、`/restaurants/:id` 菜單、`/sessions/:id` 該場彙總、`/ledger/:guild-id` 誰欠誰。
+
+### 直接跟它說話
+
+@ 一下就可以用自然語言問事情。**能從資料庫查到的，一律不交給模型**：
+
+```text
+「四海豆漿大王有甚麼好吃的」   → 那家還沒建菜單 → 照實說不知道（不會編菜給你）
+「有沒有豆腐鍋可以吃」         → 查 menu_items → 列出真的有的店家與價格
+「推薦吃甚麼」「幫我挑」       → 從菜單抽幾樣真的存在的給你選
+「給我麵店」                   → 先問「你是說老余麵店嗎？」再給菜單
+「我還欠多少」「誰欠我錢」     → 查帳本 → 帳務 Embed
+「記住我不吃牛」               → 寫進長期記憶，之後都記得
+「你有記憶功能嗎」             → 程式照實回答記得多少，不讓模型自己說
+「你喜歡賽馬娘嗎」「今天天氣真好」 → 資料庫答不了，交給模型接話；回完還要過一次守門
+```
+
+改過自然語言流程之後，用 `npm run route:check` 拿真實資料庫確認每句話會走到哪一條路。
 
 ## 架構
 
@@ -126,11 +145,11 @@ flowchart LR
   B --> P[(PostgreSQL 18.6)]
   W --> P
   B --> L[免費 LLM API<br/>Groq / Gemini / Mistral]
-  B -.-> O[PP-OCRv6 small<br/>選用]
+  B --> O[ocr 容器<br/>PP-OCRv6 small]
   L -.-> B
 ```
 
-兩個入口共用資料庫，**都不直接寫 SQL**：`bot` 與 `web` 只呼叫 `db/` 與 `domain/`。LLM 閘道走 OpenAI 相容 wire format，換一家只換 `base_url`、金鑰、模型 ID，不引任何 LLM SDK。OCR 是獨立 HTTP 服務，**不要跑在 bot 容器裡**。
+兩個入口共用資料庫，**都不直接寫 SQL**：`bot` 與 `web` 只呼叫 `db/` 與 `domain/`。LLM 閘道走 OpenAI 相容 wire format，換一家只換 `base_url`、金鑰、模型 ID，不引任何 LLM SDK。OCR 是本倉 `ocr/` 的獨立容器（映像 `aipar-eta:ocr`），**不要跑在 bot 行程裡**；`web` 與 `bot` 共用映像 `aipar-eta:app`。
 
 | 層 | 目錄 | 可以依賴 |
 | --- | --- | --- |
@@ -157,7 +176,7 @@ cp .env.example .env
 ```
 
 至少填 `POSTGRES_DB`、`POSTGRES_USER`、`POSTGRES_PASSWORD`。Discord 權杖與 LLM 金鑰可稍後再補：沒填時 bot 只維持健康檢查，網站與資料庫仍可啟動。
-校內要讓 Embed 與 `/網站` 帶得出連結，再填 `PUBLIC_BASE_URL`（例如 `http://10.0.0.12:3000`）。菜單對帳 OCR 另填 `OCR_BASE_URL`，留空則整段略過。
+校內要讓 Embed 與 `/網站` 帶得出連結，再填 `PUBLIC_BASE_URL`（例如 `http://10.0.0.12:3000`）。Compose 會把 bot 的 `OCR_BASE_URL` 覆寫成 `http://ocr:8868`，不必在 `.env` 填；本機直接跑 `npm run start:bot` 才指 `http://127.0.0.1:8868`。權重若遺失，在 `ocr/` 執行 `node scripts/fetch-models.ts`。
 
 ### 2. 啟動容器
 
@@ -168,7 +187,7 @@ docker compose up --build -d
 docker compose ps
 ```
 
-三個服務都應為 `healthy`。瀏覽器或 `curl` 開 <http://127.0.0.1:3000/health>，應看到 `ok: true` 與資料庫時間。
+四個服務（`postgres`、`ocr`、`web`、`bot`）都應為 `healthy`。瀏覽器或 `curl` 開 <http://127.0.0.1:3000/health>，應看到 `ok: true` 與資料庫時間；OCR 探針在 <http://127.0.0.1:8868/health>。
 
 ### 3. Discord（要用 bot 時）
 
@@ -181,15 +200,16 @@ docker compose ps
 /設定 通知 身分組:@訂餐
 ```
 
-**這一輪指令表有增減**（拿掉 `/點餐`、新增 `/網站`、截止改成整數分鐘）。部署後請跑 `npm run register`（或 `docker compose exec bot node src/scripts/register-commands.ts`）。
+**這一輪指令表有增減**（拿掉 `/點餐`、新增 `/網站` 與 `/記憶`、截止改成整數分鐘）。部署後請跑 `npm run register`（或 `docker compose exec bot node src/scripts/register-commands.ts`）。
 
 ### 4. 常用指令
 
 | 指令 | 用途 | 需要 |
 | --- | --- | --- |
-| `npm run check` | 型別檢查 ＋ 53 項離線測試 | — |
+| `npm run check` | 型別檢查 ＋ 77 項離線測試 | — |
 | `npm test` | 只跑測試 | — |
 | `npm run smoke` | 建檔→菜單→揪團→點餐→結算→帳務，跑完自清 | 資料庫 |
+| `npm run route:check` | 拿真實資料庫驗自然語言路由（該擋在模型前的還擋著） | 資料庫 |
 | `npm run llm:check` | 每家供應商實際打一次 | 金鑰、外網 |
 | `npm run register` | 重新註冊斜線指令 | Discord 權杖 |
 
@@ -210,18 +230,19 @@ AIPAR-ETA/
 │   ├── llm/                供應商、換手、任務提示詞、OCR 客戶端
 │   ├── bot/                指令、元件、訊息、在地化字串
 │   ├── web/                頁面與唯讀 JSON API
-│   └── scripts/            smoke、llm-check、register-commands
+│   └── scripts/            smoke、llm-check、register-commands、route-check
 ├── logo/                   標誌原稿；網站 `/assets/` 與 Embed 縮圖從這裡讀
 ├── test/                   node:test 離線測試（也是行為說明書）
 ├── SPEC/                   架構與資料契約
 ├── PLAN/                   規劃草稿、修訂清單與菜單範例圖
 ├── docs/                   英文 README、貢獻指南、Hero／Demo 圖
-├── compose.yaml            postgres / web / bot
+├── compose.yaml            postgres / ocr / web / bot
+├── ocr/                    PP-OCRv6 small sidecar（權重在 models/）
 ├── DEPLOY.md               校內部屬
 └── CHANGELOG.md            變更紀錄
 ```
 
-根目錄 `requirements.txt` 依現況不列 pip 套件——這不是 Python 專案，執行相依以 `package.json` 為準。
+根目錄 `requirements.txt` 依現況不列 pip 套件——這不是 Python 專案。應用相依以根目錄 `package.json` 為準；OCR sidecar 另有 `ocr/package.json`（`onnxruntime-node`、`sharp`），不要裝進 bot 映像。
 
 ## 技術細節
 
@@ -235,6 +256,7 @@ AIPAR-ETA/
 | `/groupbuy` | `/揪團` | 開論壇貼文；截止時間填分鐘數 |
 | `/settle` | `/結算` | 結算並寫入帳本 |
 | `/ledger` | `/帳務` | 我的／總覽／誰欠誰／付款 |
+| `/memory` | `/記憶` | 我的／記住／忘記 |
 | `/help` | `/說明` | 使用說明 |
 | `/website` | `/網站` | 網站連結按鈕 |
 | `/setup` | `/設定` | 指定揪團論壇與通知身分組（需管理伺服器權限） |
@@ -283,7 +305,8 @@ AIPAR-ETA/
 | `LLM_ALLOW_METERED` | | `true` 才啟用計費型供應商（iAI），預設關閉 |
 | `LOCAL_LLM_BASE_URL` | | 本機模型保底；不要在容器內跑本地 LLM |
 | `PUBLIC_BASE_URL` | | 網站對外位址；Embed 標誌與 `/網站` 的連結按鈕用它 |
-| `OCR_BASE_URL` | | 菜單對帳 OCR（PP-OCRv6 small）；留空＝略過，不影響其他流程 |
+| `OCR_BASE_URL` | | 菜單對帳 OCR。Compose 覆寫成 `http://ocr:8868`；本機直跑 bot 才填 `http://127.0.0.1:8868` |
+| `OCR_TIMEOUT_MS` | | Compose 給 60000；程式預設 20000 |
 
 範本與註解在 [`.env.example`](.env.example)。`.env` 不進 Git、不進映像。
 
@@ -294,9 +317,9 @@ AIPAR-ETA/
 
 供應商：Groq（文字第一棒）→ Gemini（視覺第一棒）→ Mistral → 本機。計費的 iAI 預設關閉。
 
-- **空回覆視為該家失敗**並換下一家（Gemini 免費層常把 token 花在思考上）。
+- **空回覆或要 JSON 卻挖不出來**視為該家失敗並換下一家（Gemini 免費層常把 token 花在思考上，或回一段無法解析的字）。
 - 429／5xx 同一把重試一次再換手；401／403 立刻換下一把。
-- 菜單圖片辨識與文字模型分開排隊。設定了 `OCR_BASE_URL` 才會先跑 PP-OCRv6 small 對帳；只標記不改草稿。
+- 菜單圖片辨識與文字模型分開排隊。Compose 會先打本倉 `ocr/` 的 PP-OCRv6 small 對帳；只標記不改草稿。`menu-vision`／`menu-text` 開 `require_json`。
 
 紅線：價格永遠查 `menu_items`；規則對得到就不呼叫模型。細節見 [`SPEC/llm-gateway.md`](SPEC/llm-gateway.md)。採用前請跑 `npm run llm:check`，價目表上有的模型不一定打得到。
 
@@ -308,9 +331,8 @@ AIPAR-ETA/
 - Node.js 24 Active LTS（Krypton），≥ 24.12 以 type stripping 直接跑 `.ts`，無建置步驟
 - PostgreSQL 18.6（`postgres:18.6-alpine`；19 當時仍為 beta）
 - discord.js 14.27、`pg` 8.23
-- 映像：`node:24-bookworm-slim`，非 root 使用者 `node`，時區 `Asia/Taipei`；`COPY logo ./logo`
-- 編排檔：`compose.yaml`（Compose Specification，不含過時的 `version` 欄）
-- `postgres` 埠只綁 `127.0.0.1`，不對校園網開放
+- 映像：`web`／`bot` 共用 `aipar-eta:app`（`node:24-bookworm-slim`，非 root `node`，`COPY logo ./logo`）；OCR 另建 `aipar-eta:ocr`
+- 編排檔：`compose.yaml`（Compose Specification，不含過時的 `version` 欄）；`postgres` 與 `ocr` 埠只綁 `127.0.0.1`
 - 品牌色取自標誌：金 `#eabf29`、藍 `#259fc8`（網站與 Embed 共用）
 
 </details>

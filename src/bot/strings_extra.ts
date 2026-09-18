@@ -83,13 +83,83 @@ export const EXTRA_STRINGS = {
   ],
   "help.field_chat": ["④ 直接跟我說話", "④ Just talk to me"],
   "help.field_chat_body": [
-    "@ 我就可以用自然語言問「聞香來有什麼」「我還欠多少」「誰欠我錢」。\n聊別的也可以，我會接個一句再把話題帶回吃飯。",
-    "Mention me and ask in plain language: “what does Wen Xiang Lai have”, “how much do I owe”, “who owes me”.\nSmall talk is fine too — I will answer and then steer us back to food.",
+    "@ 我就可以用自然語言問「聞香來有什麼」「我還欠多少」「誰欠我錢」。\n我記得這個頻道最近的對話，也記得你明講要我記的事（`/記憶`）。\n**菜名與價格一律只從資料庫來**：沒建菜單的店我會直說不知道，不會猜。",
+    "Mention me and ask in plain language: “what does Wen Xiang Lai have”, “how much do I owe”, “who owes me”.\nI remember the recent conversation here, and anything you asked me to remember (`/memory`).\n**Dishes and prices only ever come from the database**: if a restaurant has no menu on file I will say so rather than guess.",
   ],
   "help.field_admin": ["⑤ 管理員設定", "⑤ For server managers"],
   "help.field_admin_body": [
     "`/設定 論壇` 指定揪團要開在哪個論壇頻道\n`/設定 通知` 指定開團要 ping 的身分組",
     "`/setup forum` chooses the forum channel for group orders\n`/setup role` chooses the role to ping when one opens",
+  ],
+
+  "chat.restaurants_title": ["目前建檔的餐廳", "Restaurants on file"],
+  "chat.no_restaurants": [
+    "目前一間餐廳都還沒建檔。用 `/餐廳 新增` 建立第一間。",
+    "No restaurants on file yet. Add the first one with `/restaurant add`.",
+  ],
+  "chat.menu_state_have": ["菜單 v{version}．{count} 項", "menu v{version} · {count} items"],
+  "chat.menu_state_none": ["尚無菜單", "no menu yet"],
+  "chat.no_menu_yet": [
+    "**{name}** 有建檔，但**還沒有菜單**——所以我並不知道它賣什麼，不想亂猜給你。\n要建菜單的話：`/菜單 上傳` 丟照片辨識，或 `/菜單 輸入` 直接貼文字。",
+    "**{name}** is on file but **has no menu yet**, so I genuinely do not know what they serve and will not guess.\nTo add one: `/menu upload` for a photo, or `/menu input` to paste the text.",
+  ],
+  "chat.blocked": [
+    "這題我不確定，不想猜錯就不猜了。菜單請用 `/菜單 查看`，帳務用 `/帳務 我的`。",
+    "I am not sure about that one, and I would rather not guess. Use `/menu show` for menus and `/ledger mine` for money.",
+  ],
+
+  "chat.dish_found": ["「{dish}」這幾家有", "Where you can get {dish}"],
+  "chat.dish_none": [
+    "目前上線的菜單裡找不到「{dish}」。{hint}",
+    "Nothing matching “{dish}” in any active menu. {hint}",
+  ],
+  "chat.dish_hint_no_menu": [
+    "另外這幾家還沒建菜單，可能有但我查不到：{names}。",
+    "These places have no menu on file yet, so I cannot tell: {names}.",
+  ],
+  "chat.dish_hint_none": [
+    "要我查得到，得先用 `/菜單 上傳` 或 `/菜單 輸入` 把菜單建起來。",
+    "Add a menu with `/menu upload` or `/menu input` and I will be able to look it up.",
+  ],
+
+  "chat.recommend_title": ["幫你挑了幾樣", "A few picks for you"],
+  "chat.recommend_intro": [
+    "看了一下目前的菜單，這幾樣如何？",
+    "Looking at what is on file, how about these?",
+  ],
+  "chat.recommend_again": [
+    "不合胃口就再說一次「推薦」，我換幾樣。",
+    "Say “recommend” again and I will pick different ones.",
+  ],
+  "chat.recommend_empty": [
+    "想推薦也沒得推——目前建檔的店都還沒有菜單。先用 `/菜單 上傳` 或 `/菜單 輸入` 建一份，我就查得到了。",
+    "I would recommend something, but none of the restaurants on file have a menu yet. Add one with `/menu upload` or `/menu input` and I can help.",
+  ],
+  "chat.maybe_restaurant": ["你是說 **{name}** 嗎？", "Do you mean **{name}**?"],
+
+  "memory.title": ["我記得的事", "What I remember"],
+  "memory.status": [
+    "這個頻道最近 {turns} 句對話我還記得，關於你的長期記憶有 {facts} 條。",
+    "I still have the last {turns} messages from this channel, and {facts} long-term notes about you.",
+  ],
+  "memory.none": [
+    "目前沒有關於你的長期記憶。想讓我記住什麼就說「記住⋯⋯」，或用 `/記憶 記住`。",
+    "Nothing recorded about you yet. Say “remember …”, or use `/memory save`.",
+  ],
+  "memory.saved": ["好，我記住了：**{summary}**", "Noted: **{summary}**"],
+  "memory.forgotten": ["已經忘掉：**{summary}**", "Forgotten: **{summary}**"],
+  "memory.forgot_all": [
+    "已清掉 {facts} 條長期記憶，以及這個頻道的 {turns} 句短期對話。",
+    "Cleared {facts} long-term notes and {turns} recent messages from this channel.",
+  ],
+  "memory.not_found": ["我沒有記過這件事。", "I have nothing recorded for that."],
+  "memory.scope_user": ["關於你", "About you"],
+  "memory.scope_channel": ["關於這個頻道", "About this channel"],
+  "memory.scope_guild": ["關於這個伺服器", "About this server"],
+  "memory.short_term": ["短期（這個頻道的最近對話）", "Short term (recent messages here)"],
+  "memory.privacy": [
+    "短期對話只留最近 40 句；長期記憶只記你明講要我記的，隨時可以用 `/記憶 忘記` 刪掉。",
+    "Only the last 40 messages are kept, and long-term notes are only what you explicitly asked me to remember. `/memory forget` removes them.",
   ],
 
   "website.title": ["AIPAR ETA 網站", "AIPAR ETA website"],

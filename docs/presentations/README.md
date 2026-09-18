@@ -6,7 +6,7 @@
 | --- | --- |
 | [AIPAR-ETA-intro.pptx](./AIPAR-ETA-intro.pptx) | 15 頁投影片（PowerPoint／Google 簡報可開） |
 | [slides.md](./slides.md) | 依頁數寫的講稿與畫面說明 |
-| [glossary.md](./glossary.md) | 專有名詞：首次出現的頁、概念、定義、本專案用途 |
+| [glossary.md](./glossary.md) | 技術專有名詞（每條含白話、概念、定義、本專案用途），依投影片首次出現頁排序 |
 | [build_pptx.py](./build_pptx.py) | 重新產出 pptx |
 | [assets/](./assets/) | 截圖與標誌 PNG |
 | [mocks/](./mocks/) | Discord／架構／流程的 HTML 示意（非正式執行頁） |

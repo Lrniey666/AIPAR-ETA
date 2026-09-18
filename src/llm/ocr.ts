@@ -1,9 +1,8 @@
 // PP-OCRv6 small 的 HTTP 客戶端。菜單圖片辨識的「對帳」來源。
 //
-// 為什麼是外掛的 HTTP 服務而不是行程內跑模型：實驗室機器效能普通，
-// AGENTS.md §6 明講不要預設在容器裡跑本地模型。OCR 服務另外起（可以在別台機器），
-// 沒設定 `OCR_BASE_URL` 就整個略過，回到原本的純視覺流程——
-// 和 LLM 供應商同一套規矩：沒設定＝跳過，不是錯誤。
+// 為什麼是獨立 HTTP 服務而不是塞進 bot：實驗室機器效能普通，辨識會拖垮 Discord。
+// 本倉的服務在 `ocr/`（PP-OCRv6 small ONNX），Compose 起 `ocr` 容器並覆寫
+// `OCR_BASE_URL=http://ocr:8868`。沒設定就整段略過，回到純視覺流程。
 //
 // 線上格式與 `src/domain/ocr_layout.ts` 的 `parse_ocr_payload` 對齊，兩種都吃：
 //   本專案約定  {"lines":[{"text","score","box"}]}

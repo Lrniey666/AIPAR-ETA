@@ -178,6 +178,23 @@ test("閘道：空回覆當成失敗，換下一家", async () => {
   assert.equal(result.text, "有內容");
 });
 
+test("閘道：要 JSON 卻挖不出來時換成下一家", async () => {
+  const gateway = new LlmGateway(
+    make_registry(make_provider("gemini", ["k1"]), make_provider("mistral", ["k2"])),
+  );
+  stub_fetch((url) =>
+    url.includes("gemini") ? ok_response("我先想一下，菜單好像有豆漿") : ok_response('{"title":"四海","categories":[]}'),
+  );
+
+  const result = await gateway.complete({
+    task: "menu-vision",
+    messages: [{ role: "user", content: "hi" }],
+    require_json: true,
+  });
+  assert.equal(result.provider, "mistral");
+  assert.equal(result.text, '{"title":"四海","categories":[]}');
+});
+
 test("閘道：全部失敗時要把每一次嘗試都帶在錯誤裡", async () => {
   const gateway = new LlmGateway(
     make_registry(make_provider("groq", ["k1"]), make_provider("gemini", ["k2"])),

@@ -10,7 +10,23 @@ const VARIANTS: Array<[RegExp, string]> = [
   [/鉄/g, "鐵"],
   [/塩/g, "鹽"],
   [/糸/g, "絲"],
+  // 「有甚麼」和「有什麼」在同一個伺服器裡混用；少了這一條，
+  // 意圖分類會把「四海豆漿大王有甚麼好吃的」當成閒聊丟給模型，然後模型就自己編菜單。
+  [/甚麼/g, "什麼"],
 ];
+
+/**
+ * 只做異體字統一，保留空白與標點。
+ * `normalise_key()` 會把標點清光，適合當索引鍵；要拿去做關鍵字比對時
+ * 標點還有用（斷句），所以另外開一支。
+ */
+export function fold_variants(value: string): string {
+  let text = to_halfwidth(value);
+  for (const [pattern, replacement] of VARIANTS) {
+    text = text.replace(pattern, replacement);
+  }
+  return text;
+}
 
 /** 全形英數轉半形，並把全形空白轉成半形空白。 */
 export function to_halfwidth(value: string): string {

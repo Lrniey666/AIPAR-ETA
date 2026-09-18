@@ -127,6 +127,81 @@ export async function get_menu_item(pool: Db, item_id: number): Promise<MenuItem
   return result.rows[0];
 }
 
+export type ItemHit = {
+  restaurant_id: number;
+  restaurant_name: string;
+  menu_version: number;
+  item_name: string;
+  price_cents: number;
+  note: string;
+  is_available: boolean;
+};
+
+/**
+ * 在**所有上線中的菜單**裡找一道菜。
+ *
+ * 「有沒有豆腐鍋可以吃」要答得出是哪幾家有，而且只能答資料庫裡真的有的。
+ * 交給模型的話，它會挑一家名字聽起來像的回答——那是猜的不是查的。
+ */
+export async function search_active_items(
+  pool: Db,
+  keyword: string,
+  limit = 12,
+): Promise<ItemHit[]> {
+  const key = normalise_key(keyword);
+  if (key.length < 1) {
+    return [];
+  }
+  const result = await pool.query<ItemHit>(
+    `SELECT r.id            AS restaurant_id,
+            r.name          AS restaurant_name,
+            m.version       AS menu_version,
+            mi.name         AS item_name,
+            mi.price_cents  AS price_cents,
+            mi.note         AS note,
+            mi.is_available AS is_available
+       FROM menu_items mi
+       JOIN menus m       ON m.id = mi.menu_id AND m.status = 'active'
+       JOIN restaurants r ON r.id = m.restaurant_id AND r.is_active
+      WHERE mi.name_key LIKE '%' || $1 || '%'
+      ORDER BY r.name, mi.position
+      LIMIT $2`,
+    [key, limit],
+  );
+  return result.rows.map((row) => ({
+    ...row,
+    restaurant_id: Number(row.restaurant_id),
+    menu_version: Number(row.menu_version),
+    price_cents: Number(row.price_cents),
+  }));
+}
+
+/** 所有上線菜單裡還在賣的品項；推薦就是從這裡抽，抽到的一定真的存在。 */
+export async function list_active_items(pool: Db, limit = 400): Promise<ItemHit[]> {
+  const result = await pool.query<ItemHit>(
+    `SELECT r.id            AS restaurant_id,
+            r.name          AS restaurant_name,
+            m.version       AS menu_version,
+            mi.name         AS item_name,
+            mi.price_cents  AS price_cents,
+            mi.note         AS note,
+            mi.is_available AS is_available
+       FROM menu_items mi
+       JOIN menus m       ON m.id = mi.menu_id AND m.status = 'active'
+       JOIN restaurants r ON r.id = m.restaurant_id AND r.is_active
+      WHERE mi.is_available
+      ORDER BY r.name, mi.position
+      LIMIT $1`,
+    [limit],
+  );
+  return result.rows.map((row) => ({
+    ...row,
+    restaurant_id: Number(row.restaurant_id),
+    menu_version: Number(row.menu_version),
+    price_cents: Number(row.price_cents),
+  }));
+}
+
 export async function delete_menu(pool: Db, menu_id: number): Promise<void> {
   await pool.query("DELETE FROM menus WHERE id = $1 AND status = 'draft'", [menu_id]);
 }

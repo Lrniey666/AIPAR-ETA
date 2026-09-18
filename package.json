@@ -18,7 +18,8 @@
     "check": "npm run typecheck && npm test",
     "compose:up": "docker compose up --build -d",
     "compose:down": "docker compose down",
-    "compose:logs": "docker compose logs -f --tail=100"
+    "compose:logs": "docker compose logs -f --tail=100",
+    "route:check": "node --env-file=.env src/scripts/route-check.ts"
   },
   "dependencies": {
     "discord.js": "^14.27.0",

@@ -107,6 +107,37 @@ Discord 使用者的顯示名稱與語言偏好。網站端要靠它把 ID 換�
 | `failed` | 辨識失敗，`error` 有原因 |
 | `applied` | 已確認並上線 |
 
+### `conversation_turns`（短期記憶）
+
+自然語言互動的最近幾輪對話，依**頻道**保存。讓 bot 接得住「那家呢」「剛剛那個」。
+
+| 欄位 | 說明 |
+| --- | --- |
+| `channel_id` | 記憶以頻道為單位；換頻道就是換一段對話 |
+| `role` | `user` / `assistant` |
+| `content` | 單則上限 600 字元，超過截斷 |
+| `intent` | 當時判定的意圖，事後要解釋「為什麼那句話被當成點餐」時看得到 |
+
+寫入時順手把超過 **40 筆**的舊紀錄刪掉，不另外排程。寫入失敗只是記不住，
+不會讓回覆失敗——和 `llm_calls` 同一個取捨。
+
+### `memory_facts`（長期記憶）
+
+使用者**明講**要記的事。`(guild_id, scope, subject_id, fact_key)` 唯一，
+同一個主題再講一次是更新不是新增。
+
+| `scope` | `subject_id` 指的是 | 例子 |
+| --- | --- | --- |
+| `user` | Discord 使用者 id | 不吃牛、對花生過敏、希望被叫小明 |
+| `channel` | 頻道 id | 這個頻道都訂素食 |
+| `guild` | 伺服器 id | 全伺服器共用的偏好 |
+
+**只記明講的**：擷取規則在 `src/domain/memory_capture.ts`，要有「記住…」「我不吃…」
+「我對…過敏」這類明確觸發詞才會寫入。不讓模型決定要記什麼——
+那等於讓它把自己的推測變成日後的「事實」，幻覺會從一次性的錯話升級成持久的錯資料。
+
+`/記憶 我的` 看得到全部，`/記憶 忘記` 刪得掉；留空＝連同該頻道的短期對話一起清。
+
 ### `llm_calls`
 
 每一次 LLM 呼叫的結果（供應商、模型、成功與否、延遲、狀態碼、錯誤）。
@@ -120,3 +151,5 @@ Discord 使用者的顯示名稱與語言偏好。網站端要靠它把 ID 換�
 4. 草稿菜單只有在 `status = 'draft'` 時刪得掉（`delete_menu()` 帶條件）。
 5. 債務邊不會指向自己：`counterparty_user_id = discord_user_id` 的紀錄不進 `list_debt_edges()`。
 6. 使用者只刪得掉自己的點餐：`delete_user_lines()` 與 `delete_order_line()` 都帶 `discord_user_id` 條件。
+7. 記憶不跨伺服器：`conversation_turns` 與 `memory_facts` 都帶 `guild_id`，查詢一律帶進 WHERE。
+8. 長期記憶只寫使用者明講的內容；模型不得寫入 `memory_facts`。

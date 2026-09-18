@@ -1,7 +1,7 @@
 # AIPAR ETA 通用介紹簡報
 
 15 頁、16:9。投影片檔：[`AIPAR-ETA-intro.pptx`](./AIPAR-ETA-intro.pptx)。
-專有名詞依出現順序見 [`glossary.md`](./glossary.md)。重新產出：`python docs/presentations/build_pptx.py`。
+技術專有名詞依出現順序見 [`glossary.md`](./glossary.md)。重新產出：`python docs/presentations/build_pptx.py`。
 
 畫面來源：
 

@@ -4,10 +4,13 @@
 //   429／5xx／連線錯：同一把可重試一次（聽 Retry-After），再不行換下一把
 //   401／403：這把金鑰無效，立刻換下一把
 //   400：請求本身有問題，跳過這家剩下的金鑰
+//   回覆為空：當成這家失敗，換下一家
+//   require_json 卻挖不出 JSON：同上（菜單圖常見：思考／截斷把 JSON 弄壞）
 //
 // 等待上限刻意壓在幾秒內——Discord 互動不能讓使用者等一分鐘。
 
 import { create_logger } from "../shared/logger.ts";
+import { extract_json } from "./json.ts";
 import { load_providers, type Provider, type ProviderRegistry } from "./providers.ts";
 import {
   AUTH_STATUS,
@@ -55,6 +58,8 @@ export type GatewayOptions = {
   temperature?: number;
   max_tokens?: number;
   json_mode?: boolean;
+  /** 回覆必須挖得出 JSON；挖不到就當這家失敗、換下一家。菜單辨識用。 */
+  require_json?: boolean;
   on_delta?: (chunk: string) => void;
   signal?: AbortSignal;
   /** 只試這幾家（測試或指定供應商時用）。 */
@@ -151,6 +156,14 @@ export class LlmGateway {
       for (let attempt = 0; attempt <= RETRIES_PER_KEY; attempt += 1) {
         try {
           const outcome = await call_provider(provider, api_key, call_options);
+          if (options.require_json && extract_json(outcome.text) === undefined) {
+            const preview = outcome.text.replace(/\s+/g, " ").trim().slice(0, 80);
+            throw new ProviderCallError(
+              preview ? `模型沒有回傳可解析的 JSON（${preview}）` : "模型沒有回傳可解析的 JSON",
+              undefined,
+              false,
+            );
+          }
           attempts.push({ provider: provider.key, model, ok: true, waited_ms: 0 });
           this.#record?.({
             task: options.task,

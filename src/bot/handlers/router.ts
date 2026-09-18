@@ -7,6 +7,7 @@ import type { BotContext } from "../context.ts";
 import { reply_generic_error } from "../reply.ts";
 import { handle_component } from "./components.ts";
 import { handle_ledger } from "./ledger.ts";
+import { autocomplete_memory, handle_memory } from "./memory.ts";
 import { handle_menu } from "./menu.ts";
 import { handle_autocomplete, handle_help, handle_setup, handle_website } from "./misc.ts";
 import { handle_restaurant } from "./restaurant.ts";
@@ -17,6 +18,11 @@ const log = create_logger("router");
 export async function route_interaction(ctx: BotContext, interaction: Interaction): Promise<void> {
   try {
     if (interaction.isAutocomplete()) {
+      // 記憶的自動完成列的是「我記過的事」，和餐廳名稱是兩回事。
+      if (interaction.commandName === "memory") {
+        await autocomplete_memory(ctx, interaction);
+        return;
+      }
       await handle_autocomplete(ctx, interaction);
       return;
     }
@@ -43,6 +49,9 @@ export async function route_interaction(ctx: BotContext, interaction: Interactio
           return;
         case "ledger":
           await handle_ledger(ctx, interaction);
+          return;
+        case "memory":
+          await handle_memory(ctx, interaction);
           return;
         case "help":
           await handle_help(interaction);

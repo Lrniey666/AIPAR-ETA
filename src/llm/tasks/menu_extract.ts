@@ -125,6 +125,8 @@ export async function extract_menu_from_image(
     messages: [{ role: "user", content }],
     temperature: 0,
     max_tokens: 4096,
+    json_mode: true,
+    require_json: true,
   });
 
   return to_extraction(result.text, result.provider, result.model);
@@ -150,6 +152,7 @@ export async function extract_menu_from_text(
     temperature: 0,
     max_tokens: 4096,
     json_mode: true,
+    require_json: true,
   });
 
   return to_extraction(result.text, result.provider, result.model);
