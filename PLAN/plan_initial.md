@@ -51,7 +51,11 @@ dc使用者語言為中文(繁/簡)皆採繁體中文顯示，其他皆以英文
 
 實驗室內24/7伺服器(估計性能普普，本地模型效率不佳)，在沒有買網域的情形下可以設計為亦可透過學校內網路連結網站
 
-# LLM與視覺模型調用
+## LLM與視覺模型調用
 
 可以評估參考,優化與整合".\dev\AIPAR-ordering-system-sesearch\free-llm-api-test",".\dev\AIPAR-ordering-system-sesearch\ppocrv6-test-project"的研究嵌入本專案內
 "PLAN\example\menu_example"有菜單範例供參考
+
+## 其他
+
+架構與api設計上保持未來系統可能的擴充
