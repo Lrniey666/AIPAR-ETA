@@ -12,8 +12,10 @@ import { Client, Events, GatewayIntentBits, Partials } from "discord.js";
 import type { AppConfig } from "../config.ts";
 import type { Db } from "../db/pool.ts";
 import type { LlmGateway } from "../llm/gateway.ts";
+import type { OcrClient } from "../llm/ocr.ts";
 import { describe_registry } from "../llm/providers.ts";
 import { create_logger } from "../shared/logger.ts";
+import { set_branding } from "./branding.ts";
 import type { BotContext } from "./context.ts";
 import { handle_message } from "./handlers/message.ts";
 import { route_interaction } from "./handlers/router.ts";
@@ -31,10 +33,18 @@ export type BotHandle = {
   stop: () => Promise<void>;
 };
 
-export async function start_bot(config: AppConfig, pool: Db, gateway: LlmGateway): Promise<BotHandle> {
+export async function start_bot(
+  config: AppConfig,
+  pool: Db,
+  gateway: LlmGateway,
+  ocr: OcrClient,
+): Promise<BotHandle> {
   if (!config.discord.bot_token) {
     throw new Error("缺少 DISCORD_BOT_TOKEN，無法啟動 Discord bot。");
   }
+
+  // Embed 的標誌與網站連結都指向校內網站；沒設定就不放圖，不會出現破圖。
+  set_branding(config.public_base_url);
 
   const client = new Client({
     intents: [
@@ -50,6 +60,7 @@ export async function start_bot(config: AppConfig, pool: Db, gateway: LlmGateway
     config,
     pool,
     gateway,
+    ocr,
     client,
     pending: new PendingStore(),
   };

@@ -1,6 +1,6 @@
 <p align="center">
-  <a href="../README.md"><img alt="繁體中文" src="https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-6b6b6b?style=for-the-badge&labelColor=1c1f1d"></a>
-  <a href="#readme"><img alt="English (UK)" src="https://img.shields.io/badge/English_(UK)-2f6f4e?style=for-the-badge"></a>
+  <a href="../README.md"><img alt="繁體中文" src="https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-259fc8?style=for-the-badge&labelColor=231815"></a>
+  <a href="#readme"><img alt="English (UK)" src="https://img.shields.io/badge/English_(UK)-eabf29?style=for-the-badge&labelColor=231815"></a>
 </p>
 
 <p align="center">
@@ -16,11 +16,12 @@
 </p>
 
 <p align="center">
-  <img alt="version" src="https://img.shields.io/badge/version-0.2.0-2f6f4e?style=flat-square">
+  <img alt="release" src="https://img.shields.io/badge/release-0.2.0-eabf29?style=flat-square&labelColor=231815">
+  <img alt="unreleased" src="https://img.shields.io/badge/unreleased-revise-259fc8?style=flat-square&labelColor=231815">
   <img alt="node" src="https://img.shields.io/badge/node-%E2%89%A524.12-339933?style=flat-square&logo=nodedotjs&logoColor=white">
   <img alt="postgres" src="https://img.shields.io/badge/postgres-18.6-4169E1?style=flat-square&logo=postgresql&logoColor=white">
   <img alt="discord.js" src="https://img.shields.io/badge/discord.js-14.27-5865F2?style=flat-square&logo=discord&logoColor=white">
-  <img alt="locale" src="https://img.shields.io/badge/locale-zh--Hant%20%2F%20en--GB-2f6f4e?style=flat-square">
+  <img alt="locale" src="https://img.shields.io/badge/locale-zh--Hant%20%2F%20en--GB-eabf29?style=flat-square&labelColor=231815">
   <img alt="licence" src="https://img.shields.io/badge/licence-private-6b6b6b?style=flat-square">
 </p>
 
@@ -32,15 +33,16 @@
   <a href="#project-structure">Structure</a> ·
   <a href="#contributing">Contributing</a> ·
   <a href="../DEPLOY.md">Campus deploy</a> ·
-  <a href="./README.md">Docs index</a>
+  <a href="./README.md">Docs index</a> ·
+  <a href="./presentations/README.md">Talk deck</a>
 </p>
 
 ---
 
-Lunch orders should not live across ten Discord messages. AIPAR ETA keeps restaurants, forum group-buys, and the ledger in one system: **writes go through the Discord bot**, **reads go through the campus website**, and **state lives in PostgreSQL**. Natural language and menu-image recognition use **free LLM APIs only**. With no keys at all, buttons and dropdowns still work.
+Lunch orders should not live across ten Discord messages. AIPAR ETA keeps restaurants, forum group-buys, and the ledger in one system: **writes go through the Discord bot**, **reads go through the campus website**, and **state lives in PostgreSQL**. Natural language and menu-image recognition use **free LLM APIs only**. Menu-reconciliation OCR (PP-OCRv6 small) is optional and skipped when unset. With no keys at all, buttons and dropdowns still work.
 
-> **Status (0.2.0).** The three product features are implemented. Offline tests, the end-to-end smoke run, and container health checks have passed locally.
-> Live Discord use (opening a round, buttons, plain-language orders, settling) has not yet been signed off with real people in a server.
+> **Status (0.2.0 + Unreleased).** The three product features shipped in 0.2.0. This round follows `PLAN/AEPARC_EAT_Revise_1.md`: vertical-menu OCR, plain-language cancel and ledger queries, who-owes-whom, and a themed dashboard.
+> 53 offline tests and the local website pages have passed. **Live Discord use has not been signed off.** The command table changed — run `npm run register` after deploy.
 
 English in this project is **British English**. Discord users whose client language is Chinese (Traditional or Simplified) see Traditional Chinese; everyone else sees English.
 
@@ -59,14 +61,14 @@ English in this project is **British English**. Discord users whose client langu
 
 ### Group orders
 
-`/groupbuy` opens a forum post; the bot pins the menu and a running summary. Members press *Order* for a multi-select dropdown, or type “one chicken rice and a tea”. The combined list and per-person totals stay in sync.
+`/groupbuy` opens a forum post (and can ping a role); the bot pins the menu and a running summary. Members press *Order* to pick a quantity and items, or type “one chicken rice and a tea”; “cancel the tea” takes it back off. Once the deadline passes the summary says *Closed* instead of counting down forever.
 
 </td>
 <td width="33%" valign="top">
 
 ### Ledger
 
-`/settle` writes each person’s subtotal. The same person is never charged twice for the same round. `/ledger mine`, `/ledger all`, and `/ledger pay` show balances and record payments. Balances are always derived from entries — they are not stored as a column.
+`/settle` writes each person’s subtotal and records who to hand the money to. The same person is never charged twice for the same round. `/ledger who` shows netted debts and the fewest transfers that settle everyone up; `/ledger mine`, `/ledger all` and `/ledger pay` cover balances and payments. Balances are always derived from entries — they are not stored as a column.
 
 </td>
 </tr>
@@ -74,42 +76,47 @@ English in this project is **British English**. Discord users whose client langu
 
 | Also | Why |
 | --- | --- |
+| **Vertical menus are readable** | An optional PP-OCRv6 small pass works out the layout and reading order first, then cross-checks the model's draft and flags the lines that did not match. |
 | **Read-only campus site** | No public domain; a single write path (Discord) keeps authorisation simple. |
+| **Themes and accessibility** | The theme toggle uses a View Transitions circular wipe; with reduce-motion set, there is no animation at all. |
 | **Rules first, model second** | If a rule matches, the LLM is skipped. Free quotas last longer and results stay predictable. |
 | **Prices from `menu_items` only** | The model maps names and quantities. It must not set prices or rewrite the books. |
 | **zh-Hant / en-GB** | Localisation tables always ship both languages; missing one fails the type check. |
 
 ## Demo
 
-These frames follow the live string table and website stylesheet. They are illustrations, not a live feed.
+The website frame is a live capture from this machine on 2026-09-18 (dashboard, brand mark, navigation). The Discord frame is an illustration that follows the current string table and brand colours.
 
 <p align="center">
-  <img src="assets/demo-discord.png" alt="Illustrated Discord summary embed with combined order, per-person totals, and action buttons" width="720">
+  <img src="assets/demo-discord.png" alt="Illustrated Discord summary embed with combined order, per-person totals, quantity dropdown and action buttons" width="720">
 </p>
-<p align="center"><sub>Summary embed in the forum post. An Ack reaction (👀) and a streaming preview appear while the bot waits on an LLM.</sub></p>
+<p align="center"><sub>Summary embed in the forum post (gold rule). The order panel picks a quantity from 1–10. Typing “cancel the soya milk” takes a line off. An Ack reaction (👀) and a streaming preview appear while the bot waits on an LLM.</sub></p>
 
 <p align="center">
-  <img src="assets/demo-web.png" alt="Illustrated campus website showing restaurants and recent group orders" width="720">
+  <img src="assets/demo-web.png" alt="Campus website dashboard with headline figures, recent group orders and restaurants" width="720">
 </p>
-<p align="center"><sub>On the campus network: <code>http://&lt;server-LAN-IP&gt;:3000/</code>. CSS is inlined so the page does not depend on an external CDN.</sub></p>
+<p align="center"><sub>On the campus network: <code>http://&lt;server-LAN-IP&gt;:3000/</code>. CSS is inlined. The theme toggle is stored locally; with reduce-motion set there is no animation.</sub></p>
 
 ### One complete path
 
 ```text
 /setup forum  channel:#orders
+/setup role   role:@lunch
         ↓
-/restaurant add   Wen Xiang Lai
+/restaurant add   Si Hai soya milk
         ↓
-/menu upload   (or /menu input) → check the draft → Confirm
+/menu upload   (or /menu input) → check the draft (OCR flags, if any) → Confirm
         ↓
-/groupbuy   restaurant + deadline → forum post
+/groupbuy   restaurant + minutes + optional payer → forum post (may ping a role)
         ↓
-Press Order, or type   “one chicken rice and a tea”
+Press Order (quantity + items), or type   “two egg pancakes and a soya milk”
         ↓
-/settle   → /ledger mine
+“cancel the soya milk” / summary says Closed after the deadline
+        ↓
+/settle   → /ledger who · /ledger mine · /website
 ```
 
-Website routes: `/` overview, `/restaurants/:id` menu, `/sessions/:id` that round’s summary.
+Website routes: `/` dashboard, `/restaurants/:id` menu, `/sessions/:id` that round’s summary, `/ledger/:guild-id` who owes whom.
 
 ## Architecture
 
@@ -120,10 +127,11 @@ flowchart LR
   B --> P[(PostgreSQL 18.6)]
   W --> P
   B --> L[Free LLM APIs<br/>Groq / Gemini / Mistral]
+  B -.-> O[PP-OCRv6 small<br/>optional]
   L -.-> B
 ```
 
-Both entry points share the database and **never write SQL themselves**: `bot` and `web` call `db/` and `domain/` only. The LLM gateway speaks the OpenAI-compatible wire format. Switching provider means changing `base_url`, the key, and the model id — no LLM SDK is imported.
+Both entry points share the database and **never write SQL themselves**: `bot` and `web` call `db/` and `domain/` only. The LLM gateway speaks the OpenAI-compatible wire format. Switching provider means changing `base_url`, the key, and the model id — no LLM SDK is imported. OCR is a separate HTTP service; **do not run it inside the bot container**.
 
 | Layer | Directory | May depend on |
 | --- | --- | --- |
@@ -133,7 +141,7 @@ Both entry points share the database and **never write SQL themselves**: `bot` a
 | Models | `src/llm/` | `shared`, `domain` |
 | Edges | `src/bot/`, `src/web/` | the layers above; not each other |
 
-Contracts live in [`SPEC/`](../SPEC/README.md). Product intent lives in [`PLAN/plan_initial.md`](../PLAN/plan_initial.md). If they disagree: **code > SPEC > PLAN**.
+Contracts live in [`SPEC/`](../SPEC/README.md). Product intent lives in [`PLAN/plan_initial.md`](../PLAN/plan_initial.md); this round’s revisions are in [`PLAN/AEPARC_EAT_Revise_1.md`](../PLAN/AEPARC_EAT_Revise_1.md). If they disagree: **code > SPEC > PLAN**.
 
 ## Installation
 
@@ -150,6 +158,7 @@ cp .env.example .env
 ```
 
 Set at least `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD`. Discord tokens and LLM keys can wait: without them the bot stays on its health port, and the website plus database still start.
+Set `PUBLIC_BASE_URL` (for example `http://10.0.0.12:3000`) if embeds and `/website` should carry a link. Set `OCR_BASE_URL` for menu reconciliation; leave it empty to skip that step entirely.
 
 ### 2. Compose
 
@@ -166,19 +175,20 @@ All three services should be `healthy`. Open <http://127.0.0.1:3000/health> — 
 
 1. Developer Portal → Bot → Privileged Gateway Intents → enable **Message Content Intent**. Without it, plain-language orders and pasted menus arrive as empty strings.
 2. Invite with: View Channels, Send Messages, Send Messages in Threads, **Create Posts**, Embed Links, Add Reactions.
-3. Point the bot at a forum channel so `/groupbuy` has somewhere to post:
+3. Point the bot at a forum channel so `/groupbuy` has somewhere to post; set a notify role if openings should ping:
 
 ```text
 /setup forum  channel:#orders
+/setup role   role:@lunch
 ```
 
-After changing slash-command definitions, run `npm run register` (or `docker compose exec bot node src/scripts/register-commands.ts`).
+**The command table changed this round** (`/order` removed, `/website` added, the deadline is now a number of minutes). After deploy, run `npm run register` (or `docker compose exec bot node src/scripts/register-commands.ts`).
 
 ### 4. Everyday commands
 
 | Command | What it does | Needs |
 | --- | --- | --- |
-| `npm run check` | typecheck + 29 offline tests | — |
+| `npm run check` | typecheck + 53 offline tests | — |
 | `npm test` | tests only | — |
 | `npm run smoke` | restaurant → menu → group buy → order → settle → ledger, then cleans up | database |
 | `npm run llm:check` | one live call per provider | keys, network |
@@ -197,14 +207,15 @@ AIPAR-ETA/
 │   ├── config.ts           env loader (missing required names fail fast)
 │   ├── shared/             time, money, text, logging
 │   ├── db/                 one module per table; SQL in db/sql/
-│   ├── domain/             menu drafts, summaries, settlement
-│   ├── llm/                providers, failover, task prompts
+│   ├── domain/             menu drafts, summaries, settlement, debts, OCR
+│   ├── llm/                providers, failover, task prompts, OCR client
 │   ├── bot/                commands, components, messages, i18n
 │   ├── web/                pages and read-only JSON
 │   └── scripts/            smoke, llm-check, register-commands
+├── logo/                   brand files for `/assets/` and embed thumbnails
 ├── test/                   node:test (also a behaviour spec)
 ├── SPEC/                   architecture and data contracts
-├── PLAN/                   product draft and sample menu photos
+├── PLAN/                   product draft, revise list, sample menu photos
 ├── docs/                   this English README, contributing, artwork
 ├── compose.yaml            postgres / web / bot
 ├── DEPLOY.md               campus server
@@ -222,12 +233,14 @@ The root `requirements.txt` lists no pip packages on purpose. This is not a Pyth
 | --- | --- | --- |
 | `/restaurant` | `/餐廳` | add / list / info |
 | `/menu` | `/菜單` | show, upload, input, version |
-| `/groupbuy` | `/揪團` | open a forum post |
-| `/order` | `/點餐` | order inside that post |
+| `/groupbuy` | `/揪團` | open a forum post; the deadline is a number of minutes |
 | `/settle` | `/結算` | settle and write the ledger |
-| `/ledger` | `/帳務` | mine / all / pay |
+| `/ledger` | `/帳務` | mine / all / who / pay |
 | `/help` | `/說明` | how to use |
-| `/setup` | `/設定` | forum channel (Manage Server) |
+| `/website` | `/網站` | a link button to the site |
+| `/setup` | `/設定` | forum channel and notify role (Manage Server) |
+
+Ordering inside a post is done with the buttons or plain language; `/order` was removed in `Unreleased`.
 
 Restaurant options use autocomplete and return a database id. Full flows: [`SPEC/bot-interactions.md`](../SPEC/bot-interactions.md).
 
@@ -238,16 +251,21 @@ Restaurant options use autocomplete and return a database id. Full flows: [`SPEC
 
 | Path | Content |
 | --- | --- |
-| `GET /` | restaurants and recent rounds |
-| `GET /restaurants/:id` | active menu |
-| `GET /sessions/:id` | combined order and per-person totals |
+| `GET /` | dashboard: headline figures, recent rounds and restaurants |
+| `GET /restaurants` · `/restaurants/:id` | restaurant list and active menu |
+| `GET /sessions` · `/sessions/:id` | rounds, combined order and per-person totals |
+| `GET /ledger` · `/ledger/:guild-id` | who owes whom, fewest transfers, balances |
+| `GET /status` | database, LLM usage and per-server activity |
+| `GET /assets/logo.svg` | logo (allowlisted static file; Discord embeds use the same URLs) |
 | `GET /health` | service and database time |
+| `GET /api/overview` | dashboard figures |
 | `GET /api/restaurants` | optional `keyword` |
 | `GET /api/sessions` | optional `guild`, last 30 |
 | `GET /api/ledger/:guild-id` | balances |
+| `GET /api/debts/:guild-id` | netted debts and suggested transfers |
 | `GET /api/llm-usage` | `hours` defaults to 24 |
 
-JSON amounts are in **yuan**, not cents. Non-GET methods return 405. Contract: [`SPEC/web-api.md`](../SPEC/web-api.md).
+JSON amounts are in **New Taiwan dollars**, not cents. Non-GET methods return 405. Contract: [`SPEC/web-api.md`](../SPEC/web-api.md).
 
 </details>
 
@@ -264,6 +282,8 @@ JSON amounts are in **yuan**, not cents. Non-GET methods return 405. Contract: [
 | `*_API_KEYS` | | comma-separated; blank skips that provider |
 | `*_MODEL` / `*_VISION_MODEL` | | a key without a model id is skipped on purpose — never guess |
 | `LLM_ALLOW_METERED` | | `true` enables the metered provider (iAI); off by default |
+| `PUBLIC_BASE_URL` | | the site's address; used for embed logos and the `/website` button |
+| `OCR_BASE_URL` | | menu cross-check OCR (PP-OCRv6 small); leave empty to skip it entirely |
 | `LOCAL_LLM_BASE_URL` | | local fallback; do not run a local model inside the container |
 
 See [`.env.example`](../.env.example). Never commit `.env` or bake it into the image.
@@ -277,7 +297,7 @@ Order of attempt: Groq (text) → Gemini (vision) → Mistral → local. Metered
 
 - An **empty reply counts as failure** and the next provider is tried (Gemini’s free tier often spends `max_tokens` on thinking).
 - 429 / 5xx: retry the same key once, then fail over. 401 / 403: skip that key immediately.
-- Vision and text models are queued separately.
+- Vision and text models are queued separately. `OCR_BASE_URL` turns on a PP-OCRv6 small cross-check; it only flags lines, it never rewrites the draft.
 
 Hard rules: unit prices always come from `menu_items`; a matching rule means the model is not called. Details: [`SPEC/llm-gateway.md`](../SPEC/llm-gateway.md). Run `npm run llm:check` before going live — a name on a price list is not the same as an ID you can actually call.
 
@@ -289,9 +309,10 @@ Hard rules: unit prices always come from `menu_items`; a matching rule means the
 - Node.js 24 Active LTS (Krypton), ≥ 24.12, type stripping, no build step
 - PostgreSQL 18.6 (`postgres:18.6-alpine`; 19 was still beta at the time)
 - discord.js 14.27, `pg` 8.23
-- Image: `node:24-bookworm-slim`, non-root `node`, timezone `Asia/Taipei`
+- Image: `node:24-bookworm-slim`, non-root `node`, timezone `Asia/Taipei`; `COPY logo ./logo`
 - Compose file: `compose.yaml` (Compose Specification; no obsolete `version` key)
 - Postgres port bound to `127.0.0.1` only — not on the campus network
+- Brand colours from the mark: gold `#eabf29`, blue `#259fc8` (website and embeds share them)
 
 </details>
 

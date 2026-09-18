@@ -7,10 +7,13 @@ import type { AppConfig } from "../config.ts";
 import { ping_database, type Db } from "../db/pool.ts";
 import { create_logger } from "../shared/logger.ts";
 import { format_datetime } from "../shared/time.ts";
-import { layout } from "./render.ts";
+import { is_asset, read_asset } from "./assets.ts";
+import { empty, layout } from "./render.ts";
 import {
+  api_debts,
   api_ledger,
   api_llm_usage,
+  api_overview,
   api_restaurant_detail,
   api_restaurants,
   api_session_detail,
@@ -18,10 +21,15 @@ import {
   NOT_FOUND_RESULT,
   type ApiResult,
 } from "./routes/api.ts";
-import { match_api_route, match_page_route } from "./routes/match.ts";
-import { page_index, page_restaurant, page_session } from "./routes/pages.ts";
+import { match_api_route, match_asset_route, match_page_route } from "./routes/match.ts";
+import { page_index, page_status, type PageResult } from "./routes/pages.ts";
+import { page_restaurant, page_restaurants } from "./routes/pages_catalogue.ts";
+import { page_ledger, page_ledger_index, page_session, page_sessions } from "./routes/pages_orders.ts";
 
 const log = create_logger("web");
+
+/** 標誌幾乎不會變，讓瀏覽器與 Discord 的 CDN 都快取一天。 */
+const ASSET_CACHE_CONTROL = "public, max-age=86400";
 
 function send_json(res: ServerResponse, status: number, body: unknown): void {
   const payload = JSON.stringify(body);
@@ -57,10 +65,38 @@ async function run_api(pool: Db, pathname: string, query: URLSearchParams): Prom
       return api_session_detail(pool, route.id);
     case "ledger":
       return api_ledger(pool, route.guild_id);
+    case "debts":
+      return api_debts(pool, route.guild_id);
+    case "overview":
+      return api_overview(pool);
     case "llm-usage": {
       const hours = Number(query.get("hours") ?? 24);
       return api_llm_usage(pool, Number.isFinite(hours) && hours > 0 ? Math.min(hours, 720) : 24);
     }
+  }
+}
+
+async function run_page(pool: Db, pathname: string): Promise<PageResult | undefined> {
+  const route = match_page_route(pathname);
+  if (!route) {
+    return undefined;
+  }
+
+  switch (route.kind) {
+    case "index":
+      return page_index(pool);
+    case "restaurants":
+      return page_restaurants(pool);
+    case "restaurant":
+      return page_restaurant(pool, route.id);
+    case "sessions":
+      return page_sessions(pool);
+    case "session":
+      return page_session(pool, route.id);
+    case "ledger":
+      return route.guild_id ? page_ledger(pool, route.guild_id) : page_ledger_index(pool);
+    case "status":
+      return page_status(pool);
   }
 }
 
@@ -104,20 +140,30 @@ export function start_web_server(config: AppConfig, pool: Db): Server {
       return;
     }
 
+    const asset_name = match_asset_route(pathname);
+    if (asset_name) {
+      const asset = is_asset(asset_name) ? await read_asset(asset_name) : undefined;
+      if (!asset) {
+        send_json(res, 404, { ok: false, error: "找不到檔案" });
+        return;
+      }
+      res.writeHead(200, {
+        "content-type": asset.content_type,
+        "content-length": asset.body.byteLength,
+        "cache-control": ASSET_CACHE_CONTROL,
+      });
+      res.end(asset.body);
+      return;
+    }
+
     if (pathname.startsWith("/api")) {
       const result = await run_api(pool, pathname, url.searchParams);
       send_json(res, result.status, result.body);
       return;
     }
 
-    const page_route = match_page_route(pathname);
-    if (page_route) {
-      const page =
-        page_route.kind === "index"
-          ? await page_index(pool)
-          : page_route.kind === "restaurant"
-            ? await page_restaurant(pool, page_route.id)
-            : await page_session(pool, page_route.id);
+    const page = await run_page(pool, pathname);
+    if (page) {
       send_html(res, page.status, page.html);
       return;
     }
@@ -128,7 +174,7 @@ export function start_web_server(config: AppConfig, pool: Db): Server {
       layout({
         title: "找不到頁面",
         generated_at: format_datetime(),
-        body: `<p class="empty">找不到這個位址。</p><p><a href="/">回總覽</a></p>`,
+        body: `${empty("找不到這個位址。")}<p><a href="/">回儀表板 →</a></p>`,
       }),
     );
   }

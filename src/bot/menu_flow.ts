@@ -9,6 +9,7 @@ import { activate_menu, create_menu_version, delete_menu, get_menu, list_menu_it
 import type { Db } from "../db/pool.ts";
 import { get_restaurant } from "../db/restaurants.ts";
 import type { DraftItem, MenuSource } from "../db/types.ts";
+import type { ReconcileReport } from "../domain/menu_reconcile.ts";
 import { link_upload_to_menu } from "../db/observability.ts";
 import { draft_rows } from "./components.ts";
 import { draft_embed } from "./embeds.ts";
@@ -29,6 +30,8 @@ export type DraftInput = {
   created_by: string;
   locale: Locale;
   upload_id?: number;
+  /** OCR 對帳結果；有的話草稿預覽會標出沒核對上的品項。 */
+  report?: ReconcileReport;
 };
 
 /** 建立草稿版本並產生預覽。草稿此時已在資料庫，但 status 還是 draft。 */
@@ -48,7 +51,13 @@ export async function present_draft(pool: Db, input: DraftInput): Promise<DraftP
 
   return {
     menu_id: menu.id,
-    embed: draft_embed(input.restaurant_name, input.items, input.locale, input.source_note),
+    embed: draft_embed(
+      input.restaurant_name,
+      input.items,
+      input.locale,
+      input.source_note,
+      input.report,
+    ),
     components: draft_rows(menu.id, input.locale),
   };
 }

@@ -1,4 +1,5 @@
 // /menu（菜單）：查看、圖片辨識、人工輸入、版本切換。
+// 圖片辨識那條路比較長（OCR 版面分析 ＋ 對帳），拆在 `menu_upload.ts`。
 
 import {
   ActionRowBuilder,
@@ -9,11 +10,10 @@ import {
 } from "discord.js";
 
 import { count_items_by_menu, get_active_menu, list_menu_items, list_menu_versions } from "../../db/menus.ts";
-import { record_menu_upload } from "../../db/observability.ts";
 import { list_restaurants } from "../../db/restaurants.ts";
 import type { Restaurant } from "../../db/types.ts";
 import { parse_menu_text } from "../../domain/menu_draft.ts";
-import { extract_menu_from_image, extract_menu_from_text } from "../../llm/tasks/menu_extract.ts";
+import { extract_menu_from_text } from "../../llm/tasks/menu_extract.ts";
 import { format_date } from "../../shared/time.ts";
 import { encode_id, menu_page_row, restaurant_select_row } from "../components.ts";
 import type { BotContext } from "../context.ts";
@@ -21,6 +21,7 @@ import { menu_embed, notice_embed } from "../embeds.ts";
 import { t, type Locale } from "../i18n.ts";
 import { present_draft, skipped_note } from "../menu_flow.ts";
 import { locale_of, reply_error, resolve_restaurant, respond } from "../reply.ts";
+import { upload_menu } from "./menu_upload.ts";
 
 const MENU_STATUS_KEY = {
   draft: "menu.status_draft",
@@ -90,62 +91,6 @@ export async function send_menu(
     embeds: [embed],
     components: pages > 1 ? [menu_page_row(menu.id, 0, pages, locale)] : [],
   });
-}
-
-async function upload_menu(ctx: BotContext, interaction: ChatInputCommandInteraction): Promise<void> {
-  const locale = locale_of(interaction);
-  const raw = interaction.options.getString("restaurant", true);
-  const attachment = interaction.options.getAttachment("image", true);
-
-  const restaurant = await resolve_restaurant(ctx.pool, raw);
-  if (!restaurant) {
-    await reply_error(interaction, t(locale, "error.restaurant_missing", { name: raw }));
-    return;
-  }
-  if (!ctx.gateway.has_vision()) {
-    await reply_error(interaction, t(locale, "error.vision_unavailable"));
-    return;
-  }
-
-  // 辨識要好幾秒，先 defer 佔住互動，這就是斜線指令版的 ack。
-  await interaction.deferReply();
-  await interaction.editReply({ embeds: [notice_embed(t(locale, "menu.reading_image"))] });
-
-  try {
-    const extraction = await extract_menu_from_image(ctx.gateway, attachment.url);
-    const upload_id = await record_menu_upload(ctx.pool, {
-      restaurant_id: restaurant.id,
-      source_url: attachment.url,
-      provider: extraction.provider,
-      model: extraction.model,
-      status: "parsed",
-      raw_response: { title: extraction.title, notes: extraction.notes, items: extraction.items },
-      created_by: interaction.user.id,
-    });
-
-    const draft = await present_draft(ctx.pool, {
-      restaurant_id: restaurant.id,
-      restaurant_name: restaurant.name,
-      items: extraction.items,
-      source: "vision",
-      source_note: t(locale, "menu.source_vision", { model: `${extraction.provider}/${extraction.model}` }),
-      created_by: interaction.user.id,
-      locale,
-      upload_id,
-    });
-
-    await interaction.editReply({ embeds: [draft.embed], components: draft.components });
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    await record_menu_upload(ctx.pool, {
-      restaurant_id: restaurant.id,
-      source_url: attachment.url,
-      status: "failed",
-      error: detail,
-      created_by: interaction.user.id,
-    });
-    await reply_error(interaction, t(locale, "error.parse_failed", { detail: detail.slice(0, 200) }));
-  }
 }
 
 async function input_menu(ctx: BotContext, interaction: ChatInputCommandInteraction): Promise<void> {

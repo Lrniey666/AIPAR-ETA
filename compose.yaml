@@ -2,6 +2,15 @@
 # 使用 Compose Specification（不要加過時的 version 欄）
 name: aipar-eta
 
+# web 與 bot 共用同一份應用映像：Dockerfile 只建一次，兩個容器用不同 command 啟動。
+# 沒寫 image 時 Compose 會預設編成 aipar-eta-web 與 aipar-eta-bot 兩筆（內容相同、標籤不同）。
+x-app-image: &app-image
+  image: aipar-eta:app
+  pull_policy: build
+  build:
+    context: .
+    dockerfile: Dockerfile
+
 services:
   postgres:
     image: postgres:18.6-alpine
@@ -24,9 +33,7 @@ services:
       start_period: 20s
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *app-image
     restart: unless-stopped
     env_file:
       - .env
@@ -55,9 +62,7 @@ services:
       start_period: 20s
 
   bot:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *app-image
     restart: unless-stopped
     env_file:
       - .env

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>AIPAR ETA｜使用路徑</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body {
+    background: #f7f6f2;
+    color: #231815;
+    font: 16px/1.4 "Noto Sans TC", "Segoe UI", system-ui, sans-serif;
+    padding: 40px 48px;
+  }
+  h1 { margin: 0 0 28px; font-size: 22px; }
+  .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .step {
+    background: #fff; border: 1px solid #e2ded3; border-radius: 16px;
+    padding: 16px 14px; min-height: 168px;
+  }
+  .n {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #eabf29; color: #231815; font-weight: 700;
+    display: grid; place-items: center; font-size: 13px; margin-bottom: 10px;
+  }
+  .step h2 { margin: 0 0 6px; font-size: 15px; }
+  .step p { margin: 0; color: #5d5a55; font-size: 13px; }
+  .cmd { font-family: "Cascadia Code", "Consolas", monospace; font-size: 12px; color: #1d6f8c; }
+  .note {
+    margin-top: 28px; background: #131518; color: #e9e7e2;
+    border-radius: 16px; padding: 16px 20px; font-size: 14px;
+  }
+  .note strong { color: #eabf29; }
+</style>
+</head>
+<body>
+  <h1>一場午餐，六個步驟</h1>
+  <div class="steps">
+    <div class="step">
+      <div class="n">1</div>
+      <h2>設定論壇</h2>
+      <p class="cmd">/設定 論壇</p>
+      <p>管理員指定揪團要開在哪個論壇頻道，需要時再設通知身分組。</p>
+    </div>
+    <div class="step">
+      <div class="n">2</div>
+      <h2>餐廳建檔</h2>
+      <p class="cmd">/餐廳 新增</p>
+      <p>寫下店名、別名、電話。之後查詢與開團都用這份名單。</p>
+    </div>
+    <div class="step">
+      <div class="n">3</div>
+      <h2>菜單上線</h2>
+      <p class="cmd">/菜單 上傳</p>
+      <p>丟照片或貼文字。辨識只產生草稿，有人按「確認寫入」才上線。</p>
+    </div>
+    <div class="step">
+      <div class="n">4</div>
+      <h2>開一場揪團</h2>
+      <p class="cmd">/揪團</p>
+      <p>選餐廳與截止分鐘數。Bot 開論壇貼文，自動貼菜單與彙總。</p>
+    </div>
+    <div class="step">
+      <div class="n">5</div>
+      <h2>點餐</h2>
+      <p>按「點餐」選數量與品項，或打「我要一份豆腐鍋」。要改就說「取消地瓜薯條」。</p>
+    </div>
+    <div class="step">
+      <div class="n">6</div>
+      <h2>結算</h2>
+      <p class="cmd">/結算</p>
+      <p>每人小計寫進帳本，並記下要把錢拿給誰。同場同人不會重複計費。</p>
+    </div>
+  </div>
+  <div class="note">網站對應頁面：<strong>/</strong> 儀表板　<strong>/restaurants</strong> 菜單　<strong>/sessions</strong> 該場彙總　<strong>/ledger</strong> 誰欠誰。查閱用網站，寫入只走 Discord。</div>
+</body>
+</html>

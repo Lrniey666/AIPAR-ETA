@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>AIPAR ETA｜系統架構</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body {
+    background: #f7f6f2;
+    color: #231815;
+    font: 16px/1.45 "Noto Sans TC", "Segoe UI", system-ui, sans-serif;
+    padding: 36px 48px;
+  }
+  h1 { margin: 0 0 6px; font-size: 22px; letter-spacing: .04em; }
+  .sub { margin: 0 0 28px; color: #5d5a55; font-size: 14px; }
+  .row { display: flex; align-items: stretch; gap: 18px; }
+  .col { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+  .card {
+    background: #fff;
+    border: 1px solid #e2ded3;
+    border-radius: 16px;
+    padding: 16px 18px;
+    box-shadow: 0 1px 2px rgba(35,24,21,.05), 0 8px 24px rgba(35,24,21,.06);
+  }
+  .card h2 { margin: 0 0 6px; font-size: 15px; }
+  .card p { margin: 0; color: #5d5a55; font-size: 13px; }
+  .tag {
+    display: inline-block; font-size: 11px; letter-spacing: .06em;
+    color: #b8860b; background: rgba(234,191,41,.16);
+    border-radius: 999px; padding: 2px 8px; margin-bottom: 8px;
+  }
+  .tag.blue { color: #1d6f8c; background: rgba(37,159,200,.14); }
+  .tag.ink { color: #5d5a55; background: #efece4; }
+  .arrow {
+    width: 36px; display: grid; place-items: center;
+    color: #b8860b; font-size: 22px; font-weight: 700;
+  }
+  .store {
+    margin-top: 22px;
+    background: #131518; color: #e9e7e2;
+    border-radius: 16px; padding: 18px 22px;
+    display: flex; justify-content: space-between; gap: 24px; align-items: center;
+  }
+  .store h2 { margin: 0 0 4px; font-size: 16px; color: #eabf29; }
+  .store p { margin: 0; font-size: 13px; color: #a3a8b0; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    border: 1px solid #30353c; border-radius: 999px;
+    padding: 4px 10px; font-size: 12px; color: #e9e7e2;
+  }
+</style>
+</head>
+<body>
+  <h1>兩個入口，一份資料</h1>
+  <p class="sub">寫入走 Discord bot，查閱走校內網站；金額與菜單都存在 PostgreSQL。</p>
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <div class="tag">使用端</div>
+        <h2>實驗室成員</h2>
+        <p>在 Discord 下指令、按按鈕，或直接打「我要一份豆腐鍋」。</p>
+      </div>
+      <div class="card">
+        <div class="tag">使用端</div>
+        <h2>校內瀏覽器</h2>
+        <p>打開內網網站看餐廳、揪團彙總與帳務，不負責寫入。</p>
+      </div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="col">
+      <div class="card">
+        <div class="tag blue">bot 容器</div>
+        <h2>Discord bot</h2>
+        <p>斜線指令、論壇貼文、點餐面板、自然語言、結算與封單。</p>
+      </div>
+      <div class="card">
+        <div class="tag blue">web 容器</div>
+        <h2>校內網站</h2>
+        <p>伺服器端渲染頁面與唯讀 JSON API，樣式全部內嵌。</p>
+      </div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="col">
+      <div class="card">
+        <div class="tag ink">資料</div>
+        <h2>PostgreSQL 18.6</h2>
+        <p>餐廳、菜單、揪團、點餐列、帳本。金額以整數分計算。</p>
+      </div>
+      <div class="card">
+        <div class="tag ink">模型</div>
+        <h2>免費 LLM 閘道</h2>
+        <p>Groq／Gemini／Mistral。只做文字對應，不定價、不改帳。</p>
+      </div>
+    </div>
+  </div>
+  <div class="store">
+    <div>
+      <h2>分層原則</h2>
+      <p>bot 與 web 不直接寫 SQL；領域邏輯不認識 Discord 或 HTTP。</p>
+    </div>
+    <div class="chips">
+      <span class="chip">shared</span>
+      <span class="chip">db</span>
+      <span class="chip">domain</span>
+      <span class="chip">llm</span>
+      <span class="chip">bot／web</span>
+    </div>
+  </div>
+</body>
+</html>

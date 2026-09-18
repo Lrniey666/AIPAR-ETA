@@ -37,6 +37,25 @@ export function discord_timestamp(value: Date, style: "f" | "R" | "t" = "f"): st
   return `<t:${Math.floor(value.getTime() / 1000)}:${style}>`;
 }
 
+export const MAX_DEADLINE_MINUTES = 60 * 24 * 7;
+
+/**
+ * 從現在起算 n 分鐘後的時刻。
+ * `/揪團` 的截止時間只收分鐘數字（PLAN 修訂：不再要使用者背 `1h30m` 這種寫法），
+ * 超出範圍回 undefined，由呼叫端給錯誤訊息。
+ */
+export function minutes_from_now(minutes: number, from: Date = new Date()): Date | undefined {
+  if (!Number.isFinite(minutes) || minutes <= 0 || minutes > MAX_DEADLINE_MINUTES) {
+    return undefined;
+  }
+  return new Date(from.getTime() + Math.round(minutes) * 60_000);
+}
+
+/** 截止時間是否已經過了。過了就不該再顯示倒數。 */
+export function is_past(value: Date | null | undefined, now: Date = new Date()): boolean {
+  return value !== null && value !== undefined && value.getTime() <= now.getTime();
+}
+
 /**
  * 解析「30 分鐘後」這類相對時間字串，回傳截止時刻。
  * 支援 `90m`、`2h`、`1h30m`、`90`（視為分鐘）。無法解析回 undefined。

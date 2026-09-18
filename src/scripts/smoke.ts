@@ -4,13 +4,14 @@
 // 會在資料庫留下前綴為 [煙霧測試] 的資料，結束前自行清掉。
 
 import { load_config } from "../config.ts";
-import { list_balances, record_entry } from "../db/ledger.ts";
+import { list_balances, list_debt_edges, record_entry } from "../db/ledger.ts";
 import { run_migrations } from "../db/migrate.ts";
 import { activate_menu, create_menu_version, list_menu_items } from "../db/menus.ts";
 import { add_order_line, create_session, list_order_lines } from "../db/orders.ts";
 import { create_pool } from "../db/pool.ts";
 import { create_restaurant } from "../db/restaurants.ts";
 import { upsert_user } from "../db/users.ts";
+import { net_debts, simplify_debts } from "../domain/debts.ts";
 import { parse_menu_text } from "../domain/menu_draft.ts";
 import { summarise_orders } from "../domain/ordering.ts";
 import { settle_session } from "../domain/settlement.ts";
@@ -124,15 +125,34 @@ try {
   }
   step("結算", `${first.charged.length} 人入帳，重跑不會重複計費`);
 
+  // 誰欠誰：結算時每筆 charge 都記了對象（這場的收款人＝開團者）。
+  const edges = await list_debt_edges(pool, GUILD_ID);
+  const owed_to_host = net_debts(edges).filter((edge) => edge.to_user_id === "user-host");
+  if (owed_to_host.length !== 3) {
+    throw new Error(`應有 3 個人欠收款人，實際 ${owed_to_host.length}`);
+  }
+  step(
+    "誰欠誰",
+    owed_to_host.map((edge) => `${edge.from_user_id} → ${format_cents(edge.amount_cents)}`).join("、"),
+  );
+
+  // 阿明把錢拿給收款人之後，這條邊就該消失。
   await record_entry(pool, {
     session_id: null,
     guild_id: GUILD_ID,
     discord_user_id: "user-a",
     kind: "payment",
     amount_cents: 20000,
+    counterparty_user_id: "user-host",
     note: `${PREFIX} 付款`,
     created_by: "smoke",
   });
+
+  const after = await list_debt_edges(pool, GUILD_ID);
+  if (net_debts(after).some((edge) => edge.from_user_id === "user-a")) {
+    throw new Error("阿明付清之後不該還有欠款");
+  }
+  step("抵銷", `付清後剩 ${simplify_debts(after).length} 筆待轉帳`);
 
   const balances = await list_balances(pool, GUILD_ID);
   const alice = balances.find((balance) => balance.discord_user_id === "user-a");

@@ -1,5 +1,8 @@
 // 顯示字串表：[繁體中文, 英式英文]。
 // 新增字串請兩種語言一起補，缺一邊會在型別檢查時就被抓出來。
+// 0.3.0 之後新增的字串放在 `strings_extra.ts`，在檔尾合併——分檔只為了守住 300 行警戒線。
+
+import { EXTRA_STRINGS } from "./strings_extra.ts";
 
 const TABLE = {
   "common.confirm": ["確認寫入", "Confirm"],
@@ -131,7 +134,10 @@ const TABLE = {
   "session.status_settled": ["已結算", "settled"],
   "session.status_cancelled": ["已取消", "cancelled"],
   "session.host": ["開團者", "Host"],
-  "session.menu_posted": ["這場的菜單如下，按「點餐」或直接打字都可以。", "Here is the menu. Press *Order* or just type what you want."],
+  "session.menu_posted": [
+    "這場的菜單如下。按下面的「點餐」選數量與品項，或直接打字說你要什麼。",
+    "Here is the menu. Press *Order* below to choose quantity and items, or just type what you want.",
+  ],
 
   "ledger.mine_title": ["你的帳務", "Your ledger"],
   "ledger.all_title": ["伺服器帳務總覽", "Server ledger"],
@@ -169,6 +175,8 @@ const TABLE = {
   ],
 } as const satisfies Record<string, readonly [string, string]>;
 
-export type StringKey = keyof typeof TABLE;
+const MERGED = { ...TABLE, ...EXTRA_STRINGS };
 
-export const STRINGS: Record<StringKey, readonly [string, string]> = TABLE;
+export type StringKey = keyof typeof MERGED;
+
+export const STRINGS: Record<StringKey, readonly [string, string]> = MERGED;

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>AIPAR ETA｜Discord 使用說明</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #1e1f22;
+    color: #dbdee1;
+    font: 15px/1.45 "Noto Sans TC", "Segoe UI", system-ui, sans-serif;
+    padding: 28px 36px;
+  }
+  .channel { color: #949ba4; font-size: 12px; letter-spacing: .04em; margin-bottom: 18px; }
+  .msg { display: flex; gap: 14px; max-width: 760px; }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%; flex: none;
+    background: #f7f6f2; display: grid; place-items: center;
+  }
+  .avatar img { width: 28px; height: 28px; }
+  .name { font-weight: 600; color: #f2f3f5; }
+  .name span { margin-left: 8px; font-size: 12px; font-weight: 400; color: #949ba4; }
+  .embed {
+    margin-top: 8px; background: #2b2d31;
+    border-left: 4px solid #eabf29;
+    border-radius: 4px; padding: 12px 16px 14px; width: 520px;
+  }
+  .embed-author { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+  .embed-author img { width: 20px; height: 20px; border-radius: 4px; }
+  .embed h2 { margin: 0 0 8px; font-size: 16px; color: #f2f3f5; }
+  .desc { margin: 0 0 12px; font-size: 13px; color: #dbdee1; }
+  .field { margin: 0 0 10px; }
+  .field b { display: block; font-size: 12px; color: #b5bac1; margin-bottom: 3px; }
+  .field p { margin: 0; white-space: pre-line; font-size: 13px; color: #dbdee1; }
+  .foot { margin-top: 10px; color: #949ba4; font-size: 12px; }
+  .row { display: flex; gap: 8px; margin-top: 10px; }
+  .btn {
+    background: #5865f2; color: #fff; border: 0; border-radius: 4px;
+    padding: 8px 14px; font: 500 14px/1 "Noto Sans TC", "Segoe UI", sans-serif;
+  }
+</style>
+</head>
+<body>
+  <div class="channel">斜線指令　·　/說明</div>
+  <div class="msg">
+    <div class="avatar"><img src="http://127.0.0.1:3000/assets/logo.svg" alt=""></div>
+    <div>
+      <div class="name">AIPAR ETA <span>今天 12:02</span></div>
+      <div class="embed">
+        <div class="embed-author"><img src="http://127.0.0.1:3000/assets/logo.svg" alt="">AIPAR ETA 使用說明</div>
+        <h2>AIPAR ETA 使用說明</h2>
+        <p class="desc">指令會依你的 Discord 語言顯示中文或英文。</p>
+        <div class="field"><b>① 建檔</b><p>/餐廳 新增　建立餐廳
+/菜單 上傳　丟菜單照片辨識（支援直書菜單）
+辨識結果一定要有人按「確認寫入」才會上線。</p></div>
+        <div class="field"><b>② 揪團與點餐</b><p>/揪團　選餐廳、填截止分鐘數，Bot 會開一則論壇貼文。
+在貼文裡按「點餐」，或直接打「我要兩個豆腐鍋」。</p></div>
+        <div class="field"><b>③ 結算與帳務</b><p>/結算　算出每人應付並寫進帳本
+/帳務 誰欠誰　看全體債務與最少轉帳建議</p></div>
+        <div class="field"><b>④ 直接跟我說話</b><p>@ 我就可以問「雷荷有什麼」「我還欠多少」。</p></div>
+        <div class="field"><b>⑤ 管理員設定</b><p>/設定 論壇　指定揪團要開在哪個論壇頻道</p></div>
+        <div class="foot">AIPAR ETA　·　實驗室伙食系統</div>
+      </div>
+      <div class="row"><button class="btn">開啟網站</button></div>
+    </div>
+  </div>
+</body>
+</html>

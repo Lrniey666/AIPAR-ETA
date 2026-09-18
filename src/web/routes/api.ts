@@ -2,12 +2,15 @@
 // 這層只讀不寫——寫入一律經由 Discord bot，避免出現第二套授權模型。
 
 import { get_active_menu, list_menu_items, list_menu_versions } from "../../db/menus.ts";
-import { list_balances } from "../../db/ledger.ts";
+import { list_balances, list_debt_edges } from "../../db/ledger.ts";
 import { summarise_llm_usage } from "../../db/observability.ts";
 import { get_session, list_order_lines, list_sessions } from "../../db/orders.ts";
 import type { Db } from "../../db/pool.ts";
 import { get_restaurant, list_restaurants, search_restaurants } from "../../db/restaurants.ts";
+import { overview_counts } from "../../db/stats.ts";
+import { net_debts, simplify_debts } from "../../domain/debts.ts";
 import { summarise_orders } from "../../domain/ordering.ts";
+import type { DebtEdge } from "../../db/types.ts";
 import { cents_to_dollars } from "../../shared/money.ts";
 
 export type ApiResult = { status: number; body: unknown };
@@ -162,6 +165,46 @@ export async function api_ledger(pool: Db, guild_id: string): Promise<ApiResult>
   };
 }
 
+/** 誰欠誰：互相抵銷後的實際欠款，加上壓到最少筆數的轉帳建議。 */
+export async function api_debts(pool: Db, guild_id: string): Promise<ApiResult> {
+  const edges = await list_debt_edges(pool, guild_id);
+  return {
+    status: 200,
+    body: {
+      ok: true,
+      guild_id,
+      debts: net_debts(edges).map(to_debt_json),
+      suggested_transfers: simplify_debts(edges).map(to_debt_json),
+    },
+  };
+}
+
+/** 儀表板用的彙總；金額同樣以元為單位。 */
+export async function api_overview(pool: Db): Promise<ApiResult> {
+  const counts = await overview_counts(pool);
+  return {
+    status: 200,
+    body: {
+      ok: true,
+      restaurants: counts.restaurants,
+      active_menus: counts.active_menus,
+      sessions: counts.sessions,
+      open_sessions: counts.open_sessions,
+      order_lines: counts.order_lines,
+      spend: cents_to_dollars(counts.spend_cents),
+      llm_calls_24h: counts.llm_calls_24h,
+    },
+  };
+}
+
 export async function api_llm_usage(pool: Db, hours: number): Promise<ApiResult> {
   return { status: 200, body: { ok: true, hours, usage: await summarise_llm_usage(pool, hours) } };
+}
+
+function to_debt_json(edge: DebtEdge): { from: string; to: string; amount: number } {
+  return {
+    from: edge.from_user_id,
+    to: edge.to_user_id,
+    amount: cents_to_dollars(edge.amount_cents),
+  };
 }

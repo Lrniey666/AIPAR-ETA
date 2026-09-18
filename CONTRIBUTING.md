@@ -10,7 +10,7 @@
 2. 用 `AGENTS.md` §3 對上這次要改的檔，**不要**一上來掃整個倉庫。
 3. 動到架構、流程、資料契約、路由時，先打開對應的那一份 [`SPEC/`](SPEC/README.md)。
 
-衝突時以程式碼為準，然後回頭修正 SPEC。產品意圖（尚未落地的需求）在 [`PLAN/plan_initial.md`](PLAN/plan_initial.md)。
+衝突時以程式碼為準，然後回頭修正 SPEC。產品意圖在 [`PLAN/plan_initial.md`](PLAN/plan_initial.md)；這一輪修訂在 [`PLAN/AEPARC_EAT_Revise_1.md`](PLAN/AEPARC_EAT_Revise_1.md)。
 
 ## 慣例
 

@@ -13,9 +13,9 @@ import {
   groupbuy_command,
   help_command,
   ledger_command,
-  order_command,
   settle_command,
   setup_command,
+  website_command,
 } from "./ordering.ts";
 
 export type { Definition } from "./options.ts";
@@ -24,15 +24,15 @@ export const COMMAND_DEFINITIONS: Definition[] = [
   restaurant_command,
   menu_command,
   groupbuy_command,
-  order_command,
   settle_command,
   ledger_command,
   help_command,
+  website_command,
   setup_command,
 ];
 
 /** 說明文與自然語言回覆引用指令名稱時，都從這裡取，避免各處寫死。 */
 export const COMMAND_NAMES = {
-  "zh-TW": ["/餐廳", "/菜單", "/揪團", "/點餐", "/結算", "/帳務", "/說明", "/設定"],
-  "en-GB": ["/restaurant", "/menu", "/groupbuy", "/order", "/settle", "/ledger", "/help", "/setup"],
+  "zh-TW": ["/餐廳", "/菜單", "/揪團", "/結算", "/帳務", "/說明", "/網站", "/設定"],
+  "en-GB": ["/restaurant", "/menu", "/groupbuy", "/settle", "/ledger", "/help", "/website", "/setup"],
 } as const;

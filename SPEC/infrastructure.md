@@ -9,8 +9,10 @@ Compose 專案名稱：`aipar-eta`
 | 服務 | 映像／建置 | 對外埠 | 職責 |
 | --- | --- | --- | --- |
 | `postgres` | `postgres:18.6-alpine` | `127.0.0.1:5432` | 主資料庫。只綁本機，不對校園網開放。 |
-| `web` | 本倉 `Dockerfile` | `${APP_PORT:-3000}` | 網站／API。校內裝置可連這一個埠。 |
-| `bot` | 同一份映像，啟動 `src/bot.ts` | 無對外埠 | Discord bot。只對內做健康檢查。 |
+| `web` | `aipar-eta:app`（本倉 `Dockerfile`） | `${APP_PORT:-3000}` | 網站／API。校內裝置可連這一個埠。啟動 `src/web.ts`。 |
+| `bot` | 同上；啟動 `src/bot.ts` | 無對外埠 | Discord bot。只對內做健康檢查。 |
+
+`web` 與 `bot` 必須寫同一個 `image:`（`aipar-eta:app`）。Compose 沒指定名稱時會依服務編成 `aipar-eta-web`／`aipar-eta-bot` 兩筆，內容幾乎相同、映像 ID 不同。`pull_policy: build` 避免誤去 Docker Hub 拉同名公開映像。
 
 網路：`aipar-eta-net`
 資料卷：`postgres_data` → 容器內 `/var/lib/postgresql`（PostgreSQL 18+ 官方映像的新預設路徑）
@@ -25,7 +27,8 @@ Compose 專案名稱：`aipar-eta`
 - 映像基底：`node:24-bookworm-slim`，以映像內建的非 root 使用者 `node` 執行。
 - 時區：`Asia/Taipei`。
 - 編排檔：`compose.yaml`（Compose Specification，不含過時的 `version` 欄）。
-- 相依只有 `pg` 與 `discord.js`；LLM 一律用內建 `fetch` 打 OpenAI 相容端點，不引 SDK。
+- 相依只有 `pg` 與 `discord.js`；LLM 與 OCR 一律用內建 `fetch` 打 HTTP 端點，不引 SDK。
+- 映像會 `COPY logo ./logo`：網站的 `/assets/` 與 Discord Embed 的縮圖都從那裡讀。
 
 ## 環境變數
 
@@ -40,6 +43,7 @@ Compose 專案名稱：`aipar-eta`
 | `BOT_HEALTH_PORT` | | bot 健康檢查埠，預設 `3001` |
 | `TZ` | | 預設 `Asia/Taipei` |
 | `LOG_LEVEL` | | `debug` / `info` / `warn` / `error`，預設 `info` |
+| `PUBLIC_BASE_URL` | | 網站對外位址（校內 IP＋埠）。Embed 標誌與 `/網站` 的連結按鈕用它；留空＝不放圖、`/網站` 回「還沒設定」 |
 | `DISCORD_BOT_TOKEN` | bot 需要 | 沒填時 bot 只維持健康檢查，不連 Discord |
 | `DISCORD_CLIENT_ID` | bot 需要 | 沒填就略過斜線指令註冊 |
 | `DISCORD_GUILD_ID` | | 只註冊到單一伺服器（立即生效，開發用）；留空＝全域註冊 |
@@ -48,13 +52,19 @@ Compose 專案名稱：`aipar-eta`
 | `LLM_ALLOW_METERED` | | `true` 才啟用計費型供應商（iAI），預設關閉 |
 | `LLM_TEXT_ORDER` / `LLM_VISION_ORDER` | | 覆寫供應商嘗試順序 |
 | `LOCAL_LLM_BASE_URL` / `LOCAL_LLM_MODEL` | | 本機模型保底（Ollama 等），留空＝不啟用 |
+| `OCR_BASE_URL` | | 菜單對帳 OCR（PP-OCRv6 small）的服務位址，留空＝整段略過 |
+| `OCR_PATH` / `OCR_API_KEY` / `OCR_MODEL` | | 端點路徑（預設 `/ocr`）、金鑰、模型名稱 |
+| `OCR_TIMEOUT_MS` / `OCR_MIN_SCORE` | | 逾時（預設 20000）與信心門檻（預設 0.6） |
+
+**OCR 服務要自己另外起，不要跑在 `bot` 容器裡。** 實驗室機器效能普通（AGENTS.md §6），
+容器裡跑辨識會拖垮 Discord 互動的回應時間。線上格式與回應形狀見 `SPEC/llm-gateway.md` §菜單 OCR 對帳。
 
 ## 驗證
 
 | 指令 | 內容 | 需要什麼 |
 | --- | --- | --- |
 | `npm run typecheck` | 型別檢查 | — |
-| `npm test` | 29 項離線測試（金額、菜單解析、點餐比對、LLM 換手、路由） | — |
+| `npm test` | 53 項離線測試（金額、菜單解析、OCR 版面與對帳、點餐與取消、債務收斂、LLM 換手、路由與外框） | — |
 | `npm run smoke` | 端到端：建檔→菜單→揪團→點餐→結算→帳務，跑完自行清資料 | 資料庫 |
 | `npm run llm:check` | 每家 LLM 供應商實際打一次 | 金鑰、外網 |
 | `npm run register` | 重新註冊斜線指令 | Discord 權杖 |
@@ -66,6 +76,7 @@ Compose 專案名稱：`aipar-eta`
 2. 邀請權限至少要有：檢視頻道、發送訊息、在討論串發送訊息、**建立貼文**（論壇）、
    嵌入連結、加上反應、管理訊息（編輯自己的彙總訊息不需要，但清理時方便）。
 3. 伺服器內先用 `/設定 論壇` 指定一個論壇頻道，`/揪團` 才有地方開貼文。
+4. 想讓開團自動通知的話，再跑一次 `/設定 通知` 指定身分組；bot 需要「提及所有身分組」或該身分組允許被提及。
 
 ## Git
 

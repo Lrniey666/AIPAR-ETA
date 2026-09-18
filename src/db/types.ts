@@ -65,6 +65,8 @@ export type OrderSession = {
   title: string;
   status: SessionStatus;
   host_user_id: string;
+  /** 先幫大家墊錢、之後要收錢的人；預設是開團者。 */
+  payer_user_id: string;
   deadline_at: Date | null;
   created_at: Date;
   closed_at: Date | null;
@@ -92,9 +94,18 @@ export type LedgerEntry = {
   discord_user_id: string;
   kind: LedgerKind;
   amount_cents: number;
+  /** 這筆帳的對象（欠誰／付給誰）。空字串＝沒有指定對象，只計入個人結餘。 */
+  counterparty_user_id: string;
   note: string;
   created_by: string;
   created_at: Date;
+};
+
+/** 有方向的債務：`from` 還欠 `to` 多少。金額一律為正。 */
+export type DebtEdge = {
+  from_user_id: string;
+  to_user_id: string;
+  amount_cents: number;
 };
 
 export type LedgerBalance = {

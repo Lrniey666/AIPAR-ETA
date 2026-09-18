@@ -12,6 +12,8 @@ ENV NODE_ENV=production \
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json ./
 COPY src ./src
+# 標誌要進映像：網站的 /assets/ 與 Discord Embed 的縮圖都從這裡讀。
+COPY logo ./logo
 USER node
 EXPOSE 3000
 CMD ["node", "src/web.ts"]

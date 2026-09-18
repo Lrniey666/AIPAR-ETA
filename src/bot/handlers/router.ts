@@ -8,9 +8,9 @@ import { reply_generic_error } from "../reply.ts";
 import { handle_component } from "./components.ts";
 import { handle_ledger } from "./ledger.ts";
 import { handle_menu } from "./menu.ts";
-import { handle_autocomplete, handle_help, handle_setup } from "./misc.ts";
+import { handle_autocomplete, handle_help, handle_setup, handle_website } from "./misc.ts";
 import { handle_restaurant } from "./restaurant.ts";
-import { handle_groupbuy, handle_order, handle_settle } from "./session.ts";
+import { handle_groupbuy, handle_settle } from "./session.ts";
 
 const log = create_logger("router");
 
@@ -38,9 +38,6 @@ export async function route_interaction(ctx: BotContext, interaction: Interactio
         case "groupbuy":
           await handle_groupbuy(ctx, interaction);
           return;
-        case "order":
-          await handle_order(ctx, interaction);
-          return;
         case "settle":
           await handle_settle(ctx, interaction);
           return;
@@ -49,6 +46,9 @@ export async function route_interaction(ctx: BotContext, interaction: Interactio
           return;
         case "help":
           await handle_help(interaction);
+          return;
+        case "website":
+          await handle_website(interaction);
           return;
         case "setup":
           await handle_setup(ctx, interaction);

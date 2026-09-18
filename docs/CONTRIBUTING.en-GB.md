@@ -10,7 +10,7 @@ This is an internal laboratory meals system. Bug fixes, tests, and documentation
 2. Use `AGENTS.md` §3 to find the files for this change. Do **not** scan the whole repository first.
 3. If the work touches architecture, flows, data contracts, or routes, open the matching file in [`SPEC/`](../SPEC/README.md).
 
-When they disagree, **code wins**, then SPEC is updated to match. Unbuilt product intent lives in [`PLAN/plan_initial.md`](../PLAN/plan_initial.md).
+When they disagree, **code wins**, then SPEC is updated to match. Product intent lives in [`PLAN/plan_initial.md`](../PLAN/plan_initial.md); this round’s revisions are in [`PLAN/AEPARC_EAT_Revise_1.md`](../PLAN/AEPARC_EAT_Revise_1.md).
 
 ## Conventions
 

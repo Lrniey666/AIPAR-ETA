@@ -4,8 +4,16 @@
 import { to_halfwidth } from "../../shared/text.ts";
 import type { LlmGateway } from "../gateway.ts";
 import { extract_json } from "../json.ts";
+import { is_cancel_request } from "./order_cancel.ts";
 
-export type IntentName = "menu-query" | "create-session" | "ledger-query" | "order" | "help" | "chat";
+export type IntentName =
+  | "menu-query"
+  | "create-session"
+  | "ledger-query"
+  | "order"
+  | "cancel-order"
+  | "help"
+  | "chat";
 
 export type Intent = {
   name: IntentName;
@@ -19,8 +27,20 @@ const MENU_WORDS = ["菜單", "有什麼", "賣什麼", "價目", "多少錢", "
 const SESSION_WORDS = ["揪團", "開團", "一起訂", "團購", "訂餐", "揪", "開單"];
 // 帳務的強訊號要排在菜單之前判斷：「我還欠多少錢」同時命中「欠」和「多少錢」，
 // 但問的顯然是帳不是菜單。
-const LEDGER_STRONG_WORDS = ["帳", "欠", "結算", "付錢", "分攤", "balance", "ledger"];
-const LEDGER_WEAK_WORDS = ["多少要付", "還要付"];
+const LEDGER_STRONG_WORDS = [
+  "帳",
+  "欠",
+  "結算",
+  "付錢",
+  "分攤",
+  "誰欠",
+  "我付了",
+  "要付多少",
+  "balance",
+  "ledger",
+  "owe",
+];
+const LEDGER_WEAK_WORDS = ["多少要付", "還要付", "算一下", "結清"];
 const ORDER_WORDS = ["我要", "我點", "幫我點", "來一", "來個", "點一"];
 const HELP_WORDS = ["怎麼用", "說明", "help", "指令", "教學"];
 
@@ -71,6 +91,10 @@ export function classify_by_rules(raw: string): Intent {
   if (contains_any(text, HELP_WORDS)) {
     return { name: "help", restaurant, confidence: 0.8, used_llm: false };
   }
+  // 取消要排在點餐之前：「取消我要的雞腿飯」同時命中兩邊，但做的事完全相反。
+  if (is_cancel_request(raw)) {
+    return { name: "cancel-order", restaurant, confidence: 0.8, used_llm: false };
+  }
   if (contains_any(text, SESSION_WORDS)) {
     return { name: "create-session", restaurant, confidence: 0.75, used_llm: false };
   }
@@ -89,7 +113,15 @@ export function classify_by_rules(raw: string): Intent {
   return { name: "chat", restaurant, confidence: 0.3, used_llm: false };
 }
 
-const INTENT_VALUES: IntentName[] = ["menu-query", "create-session", "ledger-query", "order", "help", "chat"];
+const INTENT_VALUES: IntentName[] = [
+  "menu-query",
+  "create-session",
+  "ledger-query",
+  "order",
+  "cancel-order",
+  "help",
+  "chat",
+];
 
 export async function classify_intent(gateway: LlmGateway | undefined, raw: string): Promise<Intent> {
   const by_rules = classify_by_rules(raw);
@@ -112,7 +144,8 @@ export async function classify_intent(gateway: LlmGateway | undefined, raw: stri
             `使用者說：「${raw}」\n\n` +
             `從這些意圖挑一個：${INTENT_VALUES.join("、")}\n` +
             `menu-query＝查菜單，create-session＝想揪團訂餐，order＝正在點餐，` +
-            `ledger-query＝查帳或結算，help＝問怎麼用，chat＝其他。\n` +
+            `cancel-order＝要取消已經點的東西，ledger-query＝查帳、問誰欠誰或結算，` +
+            `help＝問怎麼用，chat＝閒聊或其他。\n` +
             `輸出：{"intent":"menu-query","restaurant":"店名或空字串"}`,
         },
       ],

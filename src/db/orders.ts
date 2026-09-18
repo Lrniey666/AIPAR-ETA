@@ -4,7 +4,8 @@ import type { Db } from "./pool.ts";
 import type { OrderLine, OrderLineSource, OrderSession, SessionStatus } from "./types.ts";
 
 const SESSION_COLUMNS = `id, guild_id, channel_id, summary_msg_id, restaurant_id, menu_id,
-                         title, status, host_user_id, deadline_at, created_at, closed_at`;
+                         title, status, host_user_id, payer_user_id, deadline_at,
+                         created_at, closed_at`;
 const LINE_COLUMNS = `id, session_id, discord_user_id, display_name, menu_item_id, item_name,
                       unit_price_cents, quantity, note, source, created_at, updated_at`;
 
@@ -15,6 +16,8 @@ export type NewSession = {
   menu_id: number | null;
   title: string;
   host_user_id: string;
+  /** 收款人；留空＝沿用開團者。 */
+  payer_user_id?: string;
   deadline_at: Date | null;
 };
 
@@ -33,8 +36,8 @@ export type NewOrderLine = {
 export async function create_session(pool: Db, input: NewSession): Promise<OrderSession> {
   const result = await pool.query<OrderSession>(
     `INSERT INTO order_sessions
-       (guild_id, channel_id, restaurant_id, menu_id, title, host_user_id, deadline_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+       (guild_id, channel_id, restaurant_id, menu_id, title, host_user_id, payer_user_id, deadline_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      RETURNING ${SESSION_COLUMNS}`,
     [
       input.guild_id,
@@ -43,6 +46,7 @@ export async function create_session(pool: Db, input: NewSession): Promise<Order
       input.menu_id,
       input.title,
       input.host_user_id,
+      input.payer_user_id || input.host_user_id,
       input.deadline_at,
     ],
   );
@@ -163,6 +167,57 @@ export async function clear_user_lines(
     [session_id, discord_user_id],
   );
   return result.rowCount ?? 0;
+}
+
+/** 某人在這場點了什麼；選擇性清除的下拉要靠它列出可刪的項目。 */
+export async function list_user_lines(
+  pool: Db,
+  session_id: number,
+  discord_user_id: string,
+): Promise<OrderLine[]> {
+  const result = await pool.query<OrderLine>(
+    `SELECT ${LINE_COLUMNS} FROM order_lines
+      WHERE session_id = $1 AND discord_user_id = $2
+      ORDER BY created_at, id`,
+    [session_id, discord_user_id],
+  );
+  return result.rows;
+}
+
+/** 依 id 刪掉自己的幾筆點餐；回傳實際刪掉幾筆。只刪得掉自己的。 */
+export async function delete_user_lines(
+  pool: Db,
+  session_id: number,
+  discord_user_id: string,
+  line_ids: number[],
+): Promise<number> {
+  if (line_ids.length === 0) {
+    return 0;
+  }
+  const result = await pool.query(
+    `DELETE FROM order_lines
+      WHERE session_id = $1 AND discord_user_id = $2 AND id = ANY($3::BIGINT[])`,
+    [session_id, discord_user_id, line_ids],
+  );
+  return result.rowCount ?? 0;
+}
+
+/** 依品名刪掉自己的點餐（自然語言取消用）；回傳刪掉的列，好回報數量。 */
+export async function delete_user_lines_by_item(
+  pool: Db,
+  session_id: number,
+  discord_user_id: string,
+  menu_item_id: number | null,
+  item_name: string,
+): Promise<OrderLine[]> {
+  const result = await pool.query<OrderLine>(
+    `DELETE FROM order_lines
+      WHERE session_id = $1 AND discord_user_id = $2
+        AND (($3::BIGINT IS NOT NULL AND menu_item_id = $3::BIGINT) OR item_name = $4)
+      RETURNING ${LINE_COLUMNS}`,
+    [session_id, discord_user_id, menu_item_id, item_name],
+  );
+  return result.rows;
 }
 
 export async function delete_order_line(

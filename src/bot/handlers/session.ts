@@ -1,37 +1,27 @@
-// /groupbuy（揪團）、/order（點餐）、/settle（結算）三支指令。
+// /groupbuy（揪團）與 /settle（結算）。
+//
+// /order（點餐）在 0.3.0 移除：貼文裡已經有「點餐」按鈕與自然語言兩條路。
 
 import {
   ChannelType,
   MessageFlags,
   type ChatInputCommandInteraction,
   type ForumChannel,
-  type ThreadChannel,
 } from "discord.js";
 
 import { get_guild_settings } from "../../db/guilds.ts";
 import { get_active_menu, list_menu_items } from "../../db/menus.ts";
-import { clear_user_lines, create_session, set_summary_message } from "../../db/orders.ts";
-import { parse_order } from "../../llm/tasks/order_parse.ts";
-import { format_date, parse_duration_to_date } from "../../shared/time.ts";
-import { item_select_rows, session_rows } from "../components.ts";
+import { create_session, set_summary_message } from "../../db/orders.ts";
+import { format_date, minutes_from_now } from "../../shared/time.ts";
 import type { BotContext } from "../context.ts";
-import { menu_embed, notice_embed, session_embed, status_label } from "../embeds.ts";
+import { session_rows } from "../components_order.ts";
+import { menu_embed, session_embed } from "../embeds.ts";
 import { t } from "../i18n.ts";
+import { can_manage_session, locale_of, reply_error, resolve_restaurant, respond } from "../reply.ts";
 import {
-  can_manage_session,
-  locale_of,
-  member_display_name,
-  reply_error,
-  resolve_restaurant,
-  respond,
-} from "../reply.ts";
-import {
-  add_picks,
-  format_person_total,
   load_session,
   lock_and_settle,
   refresh_summary_message,
-  session_menu_items,
   settlement_text,
 } from "../session_flow.ts";
 
@@ -70,10 +60,21 @@ export async function handle_groupbuy(
     return;
   }
 
+  // 截止時間只收分鐘數字；Discord 已經擋掉範圍外的值，這裡是最後一道。
+  const minutes = interaction.options.getInteger("minutes");
+  let deadline_at: Date | null = null;
+  if (minutes !== null) {
+    const at = minutes_from_now(minutes);
+    if (!at) {
+      await reply_error(interaction, t(locale, "session.deadline_invalid"));
+      return;
+    }
+    deadline_at = at;
+  }
+
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-  const deadline_raw = interaction.options.getString("deadline") ?? "";
-  const deadline_at = deadline_raw ? (parse_duration_to_date(deadline_raw) ?? null) : null;
+  const payer = interaction.options.getUser("payer") ?? interaction.user;
   const title =
     interaction.options.getString("title") ??
     t(locale, "session.post_title", { date: format_date(), name: restaurant.name });
@@ -81,12 +82,17 @@ export async function handle_groupbuy(
   const items = await list_menu_items(ctx.pool, menu.id);
   const { embed: menu_view } = menu_embed(restaurant, menu, items, locale, 0);
 
-  // 論壇貼文的第一則訊息就是菜單，成員一點進來就看得到。
+  // 論壇貼文的第一則訊息就是菜單，成員一點進來就看得到；要通知的身分組也在這裡 ping。
+  const role_id = settings.notify_role_id;
+  const opening = role_id
+    ? t(locale, "session.open_ping", { role: `<@&${role_id}>`, name: restaurant.name })
+    : "";
   const thread = await (forum as ForumChannel).threads.create({
     name: title.slice(0, 100),
     message: {
-      content: t(locale, "session.menu_posted"),
+      content: [opening, t(locale, "session.menu_posted")].filter(Boolean).join("\n"),
       embeds: [menu_view],
+      allowedMentions: { roles: role_id ? [role_id] : [], parse: [] },
     },
   });
 
@@ -97,11 +103,13 @@ export async function handle_groupbuy(
     menu_id: menu.id,
     title,
     host_user_id: interaction.user.id,
+    payer_user_id: payer.id,
     deadline_at,
   });
 
   const bundle = await load_session(ctx.pool, thread.id);
   const summary_message = await thread.send({
+    content: t(locale, "session.order_hint"),
     embeds: [session_embed(session, restaurant, bundle!.summary, locale)],
     components: session_rows(session.id, session.status, locale),
   });
@@ -110,68 +118,6 @@ export async function handle_groupbuy(
   await respond(interaction, {
     content: t(locale, "session.created", { title, link: `<#${thread.id}>` }),
   });
-}
-
-export async function handle_order(ctx: BotContext, interaction: ChatInputCommandInteraction): Promise<void> {
-  const locale = locale_of(interaction);
-  const bundle = await load_session(ctx.pool, interaction.channelId);
-  if (!bundle) {
-    await reply_error(interaction, t(locale, "error.session_missing"));
-    return;
-  }
-  if (bundle.session.status !== "open") {
-    await reply_error(
-      interaction,
-      t(locale, "error.session_closed", { status: status_label(bundle.session.status, locale) }),
-    );
-    return;
-  }
-
-  const items = await session_menu_items(ctx.pool, bundle.session);
-  const text = interaction.options.getString("text");
-
-  // 沒帶文字就給下拉選單——按鈕／下拉是主路徑，自然語言是加分項。
-  if (!text) {
-    await respond(interaction, {
-      embeds: [notice_embed(t(locale, "session.pick_placeholder"))],
-      components: item_select_rows(bundle.session.id, items, 0, locale),
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
-
-  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-  const outcome = await parse_order(ctx.gateway, text, items);
-
-  if (outcome.picks.length === 0) {
-    await reply_error(
-      interaction,
-      t(locale, "error.parse_failed", { detail: outcome.unmatched.join(" / ") || text }),
-    );
-    return;
-  }
-
-  const summary_text = await add_picks(
-    ctx.pool,
-    bundle.session,
-    { id: interaction.user.id, display_name: member_display_name(interaction) },
-    outcome.picks,
-    "natural-language",
-  );
-
-  const updated = await load_session(ctx.pool, interaction.channelId);
-  const lines = [
-    t(locale, "session.added", {
-      summary: summary_text,
-      amount: format_person_total(updated!.summary, interaction.user.id),
-    }),
-  ];
-  if (outcome.unmatched.length > 0) {
-    lines.push(t(locale, "session.unmatched", { detail: outcome.unmatched.join(" / ") }));
-  }
-
-  await respond(interaction, { content: lines.join("\n") });
-  await refresh_summary_message(ctx.client, ctx.pool, interaction.channelId, locale);
 }
 
 export async function handle_settle(
@@ -197,28 +143,4 @@ export async function handle_settle(
   const result = await lock_and_settle(ctx.pool, bundle, interaction.user.id);
   await respond(interaction, { content: settlement_text(result, locale) });
   await refresh_summary_message(ctx.client, ctx.pool, interaction.channelId, locale);
-}
-
-/** 給元件處理器共用：清掉自己的點餐。 */
-export async function clear_own_lines(
-  ctx: BotContext,
-  channel_id: string,
-  user_id: string,
-): Promise<number> {
-  const bundle = await load_session(ctx.pool, channel_id);
-  if (!bundle) {
-    return 0;
-  }
-  return clear_user_lines(ctx.pool, bundle.session.id, user_id);
-}
-
-/** 封單時順手把貼文標記成已封存的標題前綴，讓論壇列表一眼看得出來。 */
-export async function mark_thread_locked(thread: ThreadChannel, locked: boolean): Promise<void> {
-  const prefix = "🔒 ";
-  const has_prefix = thread.name.startsWith(prefix);
-  if (locked && !has_prefix) {
-    await thread.setName(`${prefix}${thread.name}`.slice(0, 100)).catch(() => undefined);
-  } else if (!locked && has_prefix) {
-    await thread.setName(thread.name.slice(prefix.length)).catch(() => undefined);
-  }
 }

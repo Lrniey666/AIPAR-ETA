@@ -8,6 +8,7 @@ import { record_llm_call } from "./db/observability.ts";
 import { create_pool, ping_database } from "./db/pool.ts";
 import { start_health_server } from "./health.ts";
 import { LlmGateway } from "./llm/gateway.ts";
+import { OcrClient } from "./llm/ocr.ts";
 import { describe_registry } from "./llm/providers.ts";
 import { create_logger, set_log_level } from "./shared/logger.ts";
 
@@ -22,6 +23,9 @@ const gateway = new LlmGateway(undefined, (record) => {
   void record_llm_call(pool, record);
 });
 
+const ocr = new OcrClient();
+log.info("菜單對帳 OCR", { status: ocr.describe() });
+
 const registry = gateway.registry;
 log.info("LLM 供應商", { available: describe_registry(registry) });
 for (const skipped of registry.skipped) {
@@ -32,7 +36,7 @@ let is_discord_ready = () => false;
 let stop_bot: (() => Promise<void>) | undefined;
 
 if (config.discord.bot_token) {
-  const handle = await start_bot(config, pool, gateway);
+  const handle = await start_bot(config, pool, gateway, ocr);
   stop_bot = handle.stop;
   is_discord_ready = handle.is_ready;
 } else {
@@ -53,6 +57,7 @@ const health = start_health_server("0.0.0.0", config.bot_health_port, "bot", asy
       vision: registry.vision.map((provider) => `${provider.key}:${provider.vision_model}`),
       skipped: registry.skipped,
     },
+    ocr: { available: ocr.available(), detail: ocr.describe() },
     database: db,
   };
 });

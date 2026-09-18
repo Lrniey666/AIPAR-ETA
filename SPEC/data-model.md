@@ -42,6 +42,7 @@
 | 欄位 | 值 |
 | --- | --- |
 | `order_sessions.status` | `open` / `locked` / `settled` / `cancelled` |
+| `order_sessions.payer_user_id` | 先墊錢、之後要收錢的人；預設是 `host_user_id` |
 | `order_lines.source` | `natural-language` / `component` / `manual` |
 
 `order_lines.unit_price_cents` 是**下單當下的價格快照**。菜單之後改價，舊訂單金額不會跟著變。
@@ -65,13 +66,34 @@
 `ledger_charge_once` 是部分唯一索引 `(session_id, discord_user_id) WHERE kind = 'charge'`：
 **同一場揪團對同一個人只會計費一次**，`/結算` 重跑不會重複扣款。
 
+#### `counterparty_user_id`：誰欠誰
+
+`counterparty_user_id` 是這筆帳的對象。空字串＝沒有指定對象，只影響個人結餘。
+
+| 情境 | 寫法 |
+| --- | --- |
+| 結算時的一般成員 | `charge`，對象＝這場的 `payer_user_id` |
+| 結算時的收款人自己 | `charge`，對象留空（不然會長出「自己欠自己」的邊） |
+| `/帳務 付款` 指定「付給」 | `payment`，對象＝收款人，抵銷該方向的欠款 |
+
+有向邊由 `list_debt_edges()` 取出（charge 為正、payment／adjustment 為負），
+互抵與最少轉帳建議在 `src/domain/debts.ts`，是純函式並有離線測試。
+
+**結餘與債務是兩件事**：結餘答「我這段時間吃了多少、付了多少」，
+債務答「我該把錢拿給誰」。兩者各自成立，顯示時也分開講。
+
 ### `app_users`
 
 Discord 使用者的顯示名稱與語言偏好。網站端要靠它把 ID 換成人名。
 
 ### `guild_settings`
 
-每個伺服器的設定，目前只有揪團要用的論壇頻道 `forum_channel_id`。
+每個伺服器的設定：
+
+| 欄位 | 說明 |
+| --- | --- |
+| `forum_channel_id` | 揪團要開在哪個論壇頻道 |
+| `notify_role_id` | 開團時要 ping 的身分組；空字串＝不通知 |
 
 ### `menu_uploads`
 
@@ -96,3 +118,5 @@ Discord 使用者的顯示名稱與語言偏好。網站端要靠它把 ID 換�
 2. 同一場揪團的同一個人最多一筆 `charge`。
 3. `order_lines.quantity` 介於 1–99，`*_cents` 不得為負。
 4. 草稿菜單只有在 `status = 'draft'` 時刪得掉（`delete_menu()` 帶條件）。
+5. 債務邊不會指向自己：`counterparty_user_id = discord_user_id` 的紀錄不進 `list_debt_edges()`。
+6. 使用者只刪得掉自己的點餐：`delete_user_lines()` 與 `delete_order_line()` 都帶 `discord_user_id` 條件。
