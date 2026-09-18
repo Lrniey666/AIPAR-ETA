@@ -1,17 +1,29 @@
+// 網站進入點。校內裝置連這一個埠就能看餐廳、菜單、揪團與帳務。
+
 import { load_config } from "./config.ts";
-import { create_pool, ping_database } from "./db.ts";
-import { start_health_server } from "./health.ts";
+import { run_migrations } from "./db/migrate.ts";
+import { create_pool } from "./db/pool.ts";
+import { create_logger, set_log_level } from "./shared/logger.ts";
+import { start_web_server } from "./web/server.ts";
 
 const config = load_config();
-const pool = create_pool(config);
+set_log_level(config.log_level);
+const log = create_logger("web");
 
-start_health_server(config.app_host, config.app_port, "web", async () => {
-  const db = await ping_database(pool);
-  return {
-    ok: true,
-    service: "web",
-    name: "AIPAR ETA",
-    timezone: config.timezone,
-    database: db,
-  };
+const pool = create_pool(config);
+await run_migrations(pool);
+
+const server = start_web_server(config, pool);
+
+async function shutdown(signal: string): Promise<void> {
+  log.info("收到終止訊號，準備關閉", { signal });
+  server.close();
+  await pool.end().catch(() => undefined);
+  process.exit(0);
+}
+
+process.on("SIGTERM", () => void shutdown("SIGTERM"));
+process.on("SIGINT", () => void shutdown("SIGINT"));
+process.on("unhandledRejection", (reason) => {
+  log.error("未處理的 Promise 拒絕", { reason: reason instanceof Error ? reason.message : String(reason) });
 });

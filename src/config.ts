@@ -1,4 +1,5 @@
-// 從環境變數讀取執行設定；缺必要值時立刻失敗並給可判讀訊息
+// 從環境變數讀取執行設定；缺必要值時立刻失敗並給可判讀訊息。
+// LLM 供應商設定另見 src/llm/providers.ts，兩邊都只讀 process.env，不硬寫金鑰。
 
 export type AppConfig = {
   app_host: string;
@@ -10,7 +11,16 @@ export type AppConfig = {
   postgres_user: string;
   postgres_password: string;
   timezone: string;
-  discord_bot_token: string | undefined;
+  log_level: string;
+  public_base_url: string | undefined;
+  discord: DiscordConfig;
+};
+
+export type DiscordConfig = {
+  bot_token: string | undefined;
+  client_id: string | undefined;
+  /** 只註冊到單一伺服器時填；留空＝註冊為全域指令（生效較慢）。 */
+  dev_guild_id: string | undefined;
 };
 
 function read_required(name: string): string {
@@ -33,6 +43,10 @@ function read_port(name: string, fallback: number): number {
   return parsed;
 }
 
+function read_optional(name: string): string | undefined {
+  return process.env[name]?.trim() || undefined;
+}
+
 export function load_config(): AppConfig {
   return {
     app_host: process.env.APP_HOST?.trim() || "0.0.0.0",
@@ -44,6 +58,12 @@ export function load_config(): AppConfig {
     postgres_user: read_required("POSTGRES_USER"),
     postgres_password: read_required("POSTGRES_PASSWORD"),
     timezone: process.env.TZ?.trim() || "Asia/Taipei",
-    discord_bot_token: process.env.DISCORD_BOT_TOKEN?.trim() || undefined,
+    log_level: process.env.LOG_LEVEL?.trim().toLowerCase() || "info",
+    public_base_url: read_optional("PUBLIC_BASE_URL"),
+    discord: {
+      bot_token: read_optional("DISCORD_BOT_TOKEN"),
+      client_id: read_optional("DISCORD_CLIENT_ID"),
+      dev_guild_id: read_optional("DISCORD_GUILD_ID"),
+    },
   };
 }

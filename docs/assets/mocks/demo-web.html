@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIPAR ETA｜總覽示意</title>
+<style>
+:root { color-scheme: light; --ink:#1c1f1d; --paper:#fbfaf7; --line:#d9d6cd;
+        --accent:#2f6f4e; --muted:#6b6b6b; --card:#fff; }
+* { box-sizing: border-box; }
+html, body { margin:0; background:#e8e4d8; height:100%; overflow:hidden; }
+body { padding:20px; font: 16px/1.55 "Noto Sans TC", "Segoe UI", system-ui, sans-serif; color:var(--ink); }
+.window { max-width: 860px; margin: 0 auto; background:var(--paper); border:1px solid var(--line);
+          border-radius:16px; padding:4px 28px 20px; box-shadow: 0 18px 40px rgba(28,31,29,.08); }
+header { border-bottom:1px solid var(--line); margin-bottom:24px; padding:20px 0 12px; }
+header h1 { margin:0; font-size:20px; letter-spacing:.02em; }
+header p { margin:4px 0 0; color:var(--muted); font-size:14px; }
+a { color:var(--accent); text-decoration:none; }
+h2 { font-size:17px; margin:20px 0 8px; }
+table { border-collapse:collapse; width:100%; font-size:15px; }
+th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); }
+th { font-weight:600; color:var(--muted); font-size:13px; text-transform:uppercase; letter-spacing:.04em; }
+.tag { display:inline-block; border:1px solid var(--line); border-radius:999px;
+       padding:1px 10px; font-size:12px; color:var(--muted); }
+.tag.open { color:var(--accent); border-color:#b7d4c4; background:#eef6f1; }
+caption { caption-side:top; text-align:left; font-size:12px; color:var(--muted); padding-bottom:8px; }
+footer { margin-top:28px; padding-top:12px; border-top:1px solid var(--line);
+         color:var(--muted); font-size:13px; }
+.note { position:absolute; top:12px; right:18px; font-size:11px; color:var(--muted); letter-spacing:.04em; }
+.wrap { position:relative; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="note">介面示意 · 校內網站</div>
+  <div class="window">
+    <header>
+      <h1><a href="#">AIPAR ETA</a>｜總覽</h1>
+      <p>實驗室伙食系統的餐廳、菜單與揪團紀錄</p>
+    </header>
+    <h2>餐廳</h2>
+    <table>
+      <thead><tr><th>餐廳</th><th>別名</th><th>電話</th></tr></thead>
+      <tbody>
+        <tr><td><a href="#">聞香來簡餐</a></td><td>聞香來</td><td>07-123-4567</td></tr>
+        <tr><td><a href="#">三商巧福</a></td><td>巧福</td><td></td></tr>
+      </tbody>
+    </table>
+    <h2>最近揪團</h2>
+    <table>
+      <thead><tr><th>揪團</th><th>狀態</th><th>建立時間</th></tr></thead>
+      <tbody>
+        <tr><td><a href="#">2026-09-18 聞香來簡餐</a></td><td><span class="tag open">開放中</span></td><td>2026-09-18 12:10:00</td></tr>
+        <tr><td><a href="#">2026-09-17 三商巧福</a></td><td><span class="tag">已結算</span></td><td>2026-09-17 11:42:00</td></tr>
+      </tbody>
+    </table>
+    <footer>實驗室伙食系統．資料更新於 2026-09-18 14:54:31（台北時間）</footer>
+  </div>
+</div>
+</body>
+</html>

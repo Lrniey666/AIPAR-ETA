@@ -35,11 +35,12 @@
 ## 變更紀錄規範
 
 1. 進行任何專案程式碼或 `SPEC` 變更，皆須更新 `CHANGELOG.md`。
-2. `CHANGELOG.md` 內容需包含：
-   - 變更目的（為什麼改）
-   - 主要影響範圍（改了哪些模組/頁面/API）
-   - 驗收方式（如何確認修正生效）
-3. `CHANGELOG.md`更新時要注意最新版本號，誤將版本號重複,誤植。
+2. `CHANGELOG.md` 遵循 [Keep a Changelog 2.0.0](https://keepachangelog.com/en/2.0.0/)：
+   - 未發布變更寫在 `## [Unreleased]`；發版時再改成 `## [x.y.z] - YYYY-MM-DD`。
+   - 僅使用 Added、Changed、Deprecated、Removed、Fixed、Security；沒有內容的類型不要留空標題。
+   - 變更目的寫在該版本摘要（typed sections 之前）或各條目用詞裡；如何確認生效也寫進條目，不要另開自訂標題。
+   - 破壞性變更在該條目前加 `**Breaking:**`。
+   - 檔尾維持版本比對的 reference links；**版號不得與既有條目重複**。
 
 ## 外部版本資訊查證
 

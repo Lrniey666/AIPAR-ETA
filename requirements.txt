@@ -1,0 +1,12 @@
+# AIPAR ETA — Python 相依清單
+# 最後核對：2026-09-18（台北時間，對齊 CHANGELOG 0.2.0）
+#
+# 現況：執行時期為 Node.js 24 Active LTS，應用程式在 src/*.ts。
+# 倉庫內沒有 Python 模組，也沒有任何 pip 套件被 import。
+# 因此本檔不列出套件，避免 pip install 裝進用不到的相依。
+#
+# Node 相依請看 package.json／package-lock.json：
+#   執行：pg ^8.23.0、discord.js ^14.27.0
+#   開發：typescript ^5.9.2、@types/node ^24.3.1、@types/pg ^8.15.5
+#
+# 後續若加入菜單 OCR 等 Python 元件，再把實際 import 的套件（含版本）寫入此檔。

@@ -1,4 +1,10 @@
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+// 健康檢查伺服器。容器的 healthcheck 與校內監看都打這一支。
+
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+
+import { create_logger } from "./shared/logger.ts";
+
+const log = create_logger("health");
 
 export type HealthPayload = {
   ok: boolean;
@@ -8,7 +14,7 @@ export type HealthPayload = {
 
 type StatusLoader = () => Promise<HealthPayload>;
 
-function send_json(res: ServerResponse, status: number, body: unknown): void {
+export function send_json(res: ServerResponse, status: number, body: unknown): void {
   const payload = JSON.stringify(body);
   res.writeHead(status, {
     "content-type": "application/json; charset=utf-8",
@@ -22,7 +28,7 @@ export function start_health_server(
   port: number,
   service: string,
   load_status: StatusLoader,
-): void {
+): Server {
   const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
     const path = req.url?.split("?")[0] ?? "/";
     if (path !== "/" && path !== "/health") {
@@ -40,6 +46,7 @@ export function start_health_server(
   });
 
   server.listen(port, host, () => {
-    console.log(`[${service}] 健康檢查已監聽 ${host}:${port}`);
+    log.info("健康檢查已監聽", { service, host, port });
   });
+  return server;
 }

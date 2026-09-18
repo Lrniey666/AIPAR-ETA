@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">AIPAR ETA</title>
+  <desc id="desc">Laboratory meals system  Discord bot, campus website, PostgreSQL, free LLM APIs.</desc>
+  <defs>
+    <linearGradient id="wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f6f4e" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#2f6f4e" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .bg { fill: #fbfaf7; }
+    .frame { fill: none; stroke: #d9d6cd; stroke-width: 1; }
+    .ink { fill: #1c1f1d; }
+    .muted { fill: #6b6b6b; }
+    .accent { fill: #2f6f4e; }
+    .chip { fill: #ffffff; stroke: #d9d6cd; stroke-width: 1; }
+    .chip-text { fill: #2f6f4e; font: 600 18px "Segoe UI", "Helvetica Neue", sans-serif; }
+    .title { fill: #1c1f1d; font: 700 64px "Segoe UI", "Helvetica Neue", sans-serif; letter-spacing: 1.2px; }
+    .tag { fill: #6b6b6b; font: 400 22px "Segoe UI", "Helvetica Neue", sans-serif; }
+    .rule { stroke: #2f6f4e; stroke-width: 4; stroke-linecap: round; }
+    .bowl { fill: none; stroke: #fbfaf7; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+    .steam { fill: none; stroke: #fbfaf7; stroke-width: 3.5; stroke-linecap: round; }
+    .dot { fill: #fbfaf7; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #16181a; }
+      .frame { stroke: #2f3336; }
+      .ink, .title { fill: #e8e6e1; }
+      .muted, .tag { fill: #9aa0a6; }
+      .accent { fill: #7fb693; }
+      .chip { fill: #1c1f22; stroke: #2f3336; }
+      .chip-text { fill: #7fb693; }
+      .rule { stroke: #7fb693; }
+      .bowl, .steam { stroke: #16181a; }
+      .dot { fill: #16181a; }
+    }
+  </style>
+  <rect class="bg" width="1200" height="360" rx="28"/>
+  <rect class="frame" x="0.5" y="0.5" width="1199" height="359" rx="28"/>
+  <rect x="0" y="0" width="1200" height="360" rx="28" fill="url(#wash)"/>
+  <rect class="accent" x="56" y="86" width="96" height="96" rx="24"/>
+  <path class="bowl" d="M76 140c1.5 18 14 26 24 26s22.5-8 24-26"/>
+  <path class="bowl" d="M74 140h52"/>
+  <path class="steam" d="M90 116c0 6 6 6 6 12M100 113c0 6 6 6 6 12M110 116c0 6 6 6 6 12"/>
+  <circle class="dot" cx="132" cy="108" r="4"/>
+  <text class="title" x="176" y="142">AIPAR ETA</text>
+  <line class="rule" x1="176" y1="168" x2="248" y2="168"/>
+  <text class="tag" x="176" y="204">Laboratory meals · Discord bot · campus website · free LLM APIs</text>
+  <g transform="translate(176 248)">
+    <rect class="chip" width="118" height="40" rx="20"/>
+    <text class="chip-text" x="59" y="26" text-anchor="middle">Menus</text>
+    <rect class="chip" x="130" width="150" height="40" rx="20"/>
+    <text class="chip-text" x="205" y="26" text-anchor="middle">Group orders</text>
+    <rect class="chip" x="292" width="118" height="40" rx="20"/>
+    <text class="chip-text" x="351" y="26" text-anchor="middle">Ledger</text>
+  </g>
+</svg>

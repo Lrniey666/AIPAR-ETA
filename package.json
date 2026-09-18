@@ -1,6 +1,6 @@
 {
   "name": "aipar-eta",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "實驗室伙食系統 AIPAR ETA",
@@ -10,12 +10,18 @@
   "scripts": {
     "start:web": "node --env-file=.env src/web.ts",
     "start:bot": "node --env-file=.env src/bot.ts",
+    "register": "node --env-file=.env src/scripts/register-commands.ts",
+    "smoke": "node --env-file=.env src/scripts/smoke.ts",
+    "llm:check": "node --env-file=.env src/scripts/llm-check.ts",
+    "test": "node --test \"test/*.test.ts\"",
     "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm test",
     "compose:up": "docker compose up --build -d",
     "compose:down": "docker compose down",
     "compose:logs": "docker compose logs -f --tail=100"
   },
   "dependencies": {
+    "discord.js": "^14.27.0",
     "pg": "^8.23.0"
   },
   "devDependencies": {

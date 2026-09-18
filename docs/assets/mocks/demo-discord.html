@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>AIPAR ETA｜Discord 示意</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; }
+  html, body { height:100%; overflow:hidden; }
+  body {
+    background: #1e1f22;
+    color: #dbdee1;
+    font: 16px/1.45 "Noto Sans TC", "Segoe UI", system-ui, sans-serif;
+    padding: 24px 28px 20px;
+  }
+  .note { color:#949ba4; font-size:11px; letter-spacing:.06em; margin-bottom:16px; }
+  .msg { display:flex; gap:16px; max-width: 720px; }
+  .avatar {
+    width:40px; height:40px; border-radius:50%; flex:none;
+    background:#2f6f4e; color:#fbfaf7; display:grid; place-items:center;
+    font-weight:700; font-size:13px; letter-spacing:.04em;
+  }
+  .meta { font-size:16px; font-weight:600; color:#f2f3f5; }
+  .meta span { margin-left:8px; font-size:12px; font-weight:400; color:#949ba4; }
+  .embed {
+    margin-top:8px; background:#2b2d31; border-left:4px solid #2f6f4e;
+    border-radius:4px; padding:12px 16px 14px; max-width: 520px;
+  }
+  .embed h2 { margin:0 0 10px; font-size:16px; color:#f2f3f5; }
+  .fields { display:grid; grid-template-columns: 1fr 1fr; gap:12px 16px; }
+  .field b { display:block; font-size:12px; color:#b5bac1; margin-bottom:4px; }
+  .field p { margin:0; white-space:pre-line; color:#dbdee1; font-size:14px; }
+  .foot { margin-top:12px; color:#949ba4; font-size:12px; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; max-width:520px; }
+  .btn {
+    background:#248046; color:#fff; border:0; border-radius:4px;
+    padding:8px 14px; font: 500 14px/1 "Noto Sans TC", "Segoe UI", sans-serif;
+  }
+  .btn.grey { background:#4e5058; }
+  .btn.red { background:#da373c; }
+  .chat {
+    margin: 18px 0 0 56px; max-width: 520px;
+    background:#2b2d31; border-radius:8px; padding:10px 12px; font-size:14px;
+  }
+  .chat em { color:#00a8fc; font-style:normal; }
+  .ack { margin:8px 0 0 56px; font-size:13px; color:#f0b232; }
+</style>
+</head>
+<body>
+  <div class="note">介面示意 · Discord 揪團貼文</div>
+  <div class="msg">
+    <div class="avatar">ETA</div>
+    <div>
+      <div class="meta">AIPAR ETA <span>今天 12:10</span></div>
+      <div class="embed">
+        <h2>聞香來簡餐．點餐彙總</h2>
+        <div class="fields">
+          <div class="field">
+            <b>全體清單</b>
+            <p>雞腿飯 × 2<br>珍珠奶茶 × 1<br>紅茶 × 1</p>
+          </div>
+          <div class="field">
+            <b>每人應付</b>
+            <p>Alex　NT$130<br>Sam　NT$90</p>
+          </div>
+          <div class="field">
+            <b>人數</b>
+            <p>2</p>
+          </div>
+          <div class="field">
+            <b>合計</b>
+            <p>NT$220</p>
+          </div>
+        </div>
+        <div class="foot">更新於 2026-09-18 12:14:02　·　開放中</div>
+      </div>
+      <div class="row">
+        <button class="btn">點餐</button>
+        <button class="btn grey">我的點餐</button>
+        <button class="btn grey">重新整理</button>
+        <button class="btn grey">封單</button>
+        <button class="btn red">結算</button>
+      </div>
+    </div>
+  </div>
+  <div class="ack">👀 已讀取　·　正在對菜單…</div>
+  <div class="chat"><em>Sam</em>　我要兩個雞腿飯跟一杯紅茶</div>
+</body>
+</html>
