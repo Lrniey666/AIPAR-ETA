@@ -7,7 +7,7 @@
 
 - Discord bot
 - TS 框架 + Node.js
-- PostgreSQL
+- PostgreSQL(保存各式資料)
 - FREE LLM API
 - 實驗室伺服器與校內網路(未來情形，現為本機測試)
 - Docler容器封裝
