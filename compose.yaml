@@ -1,11 +1,11 @@
-# 實驗室點餐系統 AIPAR ETA — 本機／校內伺服器容器編排
+# 實驗室點餐系統 AIPARC ETA — 本機／校內伺服器容器編排
 # 使用 Compose Specification（不要加過時的 version 欄）
-name: aipar-eta
+name: aiparc-eta
 
 # web 與 bot 共用同一份應用映像：Dockerfile 只建一次，兩個容器用不同 command 啟動。
-# 沒寫 image 時 Compose 會預設編成 aipar-eta-web 與 aipar-eta-bot 兩筆（內容相同、標籤不同）。
+# 沒寫 image 時 Compose 會預設編成 aiparc-eta-web 與 aiparc-eta-bot 兩筆（內容相同、標籤不同）。
 x-app-image: &app-image
-  image: aipar-eta:app
+  image: aiparc-eta:app
   pull_policy: build
   build:
     context: .
@@ -13,7 +13,7 @@ x-app-image: &app-image
 
 services:
   ocr:
-    image: aipar-eta:ocr
+    image: aiparc-eta:ocr
     pull_policy: build
     build:
       context: ./ocr
@@ -24,7 +24,8 @@ services:
       OCR_HOST: 0.0.0.0
       OCR_PORT: 8868
     ports:
-      - "127.0.0.1:8868:8868"
+      # 主機側可改 OCR_HOST_PORT；容器內一律聽 8868，bot 仍打 http://ocr:8868
+      - "127.0.0.1:${OCR_HOST_PORT:-8868}:8868"
     healthcheck:
       test:
         [
@@ -65,6 +66,8 @@ services:
       - .env
     environment:
       POSTGRES_HOST: postgres
+      # 容器內 postgres 永遠聽 5432；.env 的 POSTGRES_PORT 只影響主機對映
+      POSTGRES_PORT: "5432"
       APP_HOST: 0.0.0.0
       APP_PORT: ${APP_PORT:-3000}
       TZ: Asia/Taipei
@@ -94,6 +97,7 @@ services:
       - .env
     environment:
       POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
       BOT_HEALTH_PORT: ${BOT_HEALTH_PORT:-3001}
       TZ: Asia/Taipei
       # 容器內一律打同網路的 ocr 服務；不要填 127.0.0.1（那是 bot 容器自己）。
@@ -124,4 +128,4 @@ volumes:
 
 networks:
   default:
-    name: aipar-eta-net
+    name: aiparc-eta-net

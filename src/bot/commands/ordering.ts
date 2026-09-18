@@ -122,8 +122,8 @@ export const help_command = new SlashCommandBuilder()
 export const website_command = new SlashCommandBuilder()
   .setName("website")
   .setNameLocalizations(zh_localizations("網站"))
-  .setDescription("Open the AIPAR ETA website")
-  .setDescriptionLocalizations(zh_localizations("開啟 AIPAR ETA 網站"));
+  .setDescription("Open the AIPARC ETA website")
+  .setDescriptionLocalizations(zh_localizations("開啟 AIPARC ETA 網站"));
 
 export const setup_command = new SlashCommandBuilder()
   .setName("setup")

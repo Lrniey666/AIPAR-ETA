@@ -126,7 +126,7 @@ export function start_web_server(config: AppConfig, pool: Db): Server {
         send_json(res, 200, {
           ok: true,
           service: "web",
-          name: "AIPAR ETA",
+          name: "AIPARC ETA",
           timezone: config.timezone,
           database: db,
         });

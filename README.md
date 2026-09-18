@@ -4,10 +4,10 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/hero.svg" alt="AIPAR ETA" width="760">
+  <img src="docs/assets/hero.svg" alt="AIPARC ETA" width="760">
 </p>
 
-<h1 align="center">AIPAR ETA</h1>
+<h1 align="center">AIPARC ETA</h1>
 
 <p align="center">
   <strong>實驗室伙食系統</strong><br>
@@ -40,7 +40,7 @@
 ---
 
 實驗室中午要點什麼、誰點了什麼、最後誰該付多少——這件事不該再散落在十則訊息裡。
-AIPAR ETA 把餐廳菜單、論壇揪團與帳本收進同一套系統：寫入走 Discord bot，查閱走校內網站，資料放 PostgreSQL。自然語言與菜單辨識只用**免費 LLM API**。菜單對帳 OCR（PP-OCRv6 small）是本倉 `ocr/` sidecar，Compose 會一起啟動；沒設 `OCR_BASE_URL`（且不走 Compose）才略過。沒有金鑰時按鈕與下拉仍可點餐。
+AIPARC ETA 把餐廳菜單、論壇揪團與帳本收進同一套系統：寫入走 Discord bot，查閱走校內網站，資料放 PostgreSQL。自然語言與菜單辨識只用**免費 LLM API**。菜單對帳 OCR（PP-OCRv6 small）是本倉 `ocr/` sidecar，Compose 會一起啟動；沒設 `OCR_BASE_URL`（且不走 Compose）才略過。沒有金鑰時按鈕與下拉仍可點餐。
 
 > **現況（0.2.0 ＋ Unreleased）**　三個產品功能已落地；這一輪再依 `PLAN/AEPARC_EAT_Revise_1.md` 補上直書菜單對帳（本倉 OCR 容器）、自然語言取消／查帳／推薦、誰欠誰、對話記憶、防幻覺，以及網站儀表板與深淺色。
 > 離線測試 **77** 項、`npm run smoke`、`npm run route:check` 與本機網站頁面已通過。**Discord 端的真人操作尚未驗收**（含 `/記憶`）；指令表有增減，部署後請跑 `npm run register`。
@@ -149,7 +149,7 @@ flowchart LR
   L -.-> B
 ```
 
-兩個入口共用資料庫，**都不直接寫 SQL**：`bot` 與 `web` 只呼叫 `db/` 與 `domain/`。LLM 閘道走 OpenAI 相容 wire format，換一家只換 `base_url`、金鑰、模型 ID，不引任何 LLM SDK。OCR 是本倉 `ocr/` 的獨立容器（映像 `aipar-eta:ocr`），**不要跑在 bot 行程裡**；`web` 與 `bot` 共用映像 `aipar-eta:app`。
+兩個入口共用資料庫，**都不直接寫 SQL**：`bot` 與 `web` 只呼叫 `db/` 與 `domain/`。LLM 閘道走 OpenAI 相容 wire format，換一家只換 `base_url`、金鑰、模型 ID，不引任何 LLM SDK。OCR 是本倉 `ocr/` 的獨立容器（映像 `aiparc-eta:ocr`），**不要跑在 bot 行程裡**；`web` 與 `bot` 共用映像 `aiparc-eta:app`。
 
 | 層 | 目錄 | 可以依賴 |
 | --- | --- | --- |
@@ -220,7 +220,7 @@ docker compose ps
 ## 專案結構
 
 ```text
-AIPAR-ETA/
+AIPARC-ETA/
 ├── src/
 │   ├── web.ts / bot.ts     行程進入點
 │   ├── config.ts           環境變數（缺必要值就失敗並印變數名）
@@ -295,17 +295,18 @@ AIPAR-ETA/
 
 | 變數 | 必要 | 說明 |
 | --- | --- | --- |
-| `POSTGRES_*` | ✓ | 資料庫連線。容器內 `POSTGRES_HOST` 會被覆寫成 `postgres` |
+| `POSTGRES_*` | ✓ | 資料庫連線。容器內 `POSTGRES_HOST` 覆寫成 `postgres`、`POSTGRES_PORT` 覆寫成 `5432`；`.env` 的 `POSTGRES_PORT` 只影響主機對映 |
 | `APP_HOST` / `APP_PORT` | | 網站，預設 `0.0.0.0:3000` |
 | `BOT_HEALTH_PORT` | | bot 健康檢查，預設 `3001` |
 | `TZ` | | 預設 `Asia/Taipei` |
 | `DISCORD_BOT_TOKEN` / `DISCORD_CLIENT_ID` | bot 要用時 | 沒填就不連 Discord、不註冊指令 |
 | `*_API_KEYS` | | 逗號分隔多把；留空＝跳過該供應商 |
 | `*_MODEL` / `*_VISION_MODEL` | | 有金鑰沒填模型 ID＝跳過並記原因，不拿猜的 ID 去打 |
-| `LLM_ALLOW_METERED` | | `true` 才啟用計費型供應商（iAI），預設關閉 |
+| `LLM_ALLOW_METERED` | | `true` 才啟用標成計費的供應商；iAI 為免費層，不需開 |
 | `LOCAL_LLM_BASE_URL` | | 本機模型保底；不要在容器內跑本地 LLM |
 | `PUBLIC_BASE_URL` | | 網站對外位址；Embed 標誌與 `/網站` 的連結按鈕用它 |
-| `OCR_BASE_URL` | | 菜單對帳 OCR。Compose 覆寫成 `http://ocr:8868`；本機直跑 bot 才填 `http://127.0.0.1:8868` |
+| `OCR_BASE_URL` | | 菜單對帳 OCR。Compose 覆寫成 `http://ocr:8868`；本機直跑 bot 才填 `http://127.0.0.1:<OCR_HOST_PORT>` |
+| `OCR_HOST_PORT` | | 主機對映 OCR 的埠，預設 `8868`；容器內仍聽 `8868` |
 | `OCR_TIMEOUT_MS` | | Compose 給 60000；程式預設 20000 |
 
 範本與註解在 [`.env.example`](.env.example)。`.env` 不進 Git、不進映像。
@@ -315,7 +316,7 @@ AIPAR-ETA/
 <details>
 <summary>LLM 閘道與兩條紅線</summary>
 
-供應商：Groq（文字第一棒）→ Gemini（視覺第一棒）→ Mistral → 本機。計費的 iAI 預設關閉。
+供應商：Groq（文字第一棒）→ Gemini（視覺第一棒）→ Mistral → iAI → 本機。iAI 為校內免費層。
 
 - **空回覆或要 JSON 卻挖不出來**視為該家失敗並換下一家（Gemini 免費層常把 token 花在思考上，或回一段無法解析的字）。
 - 429／5xx 同一把重試一次再換手；401／403 立刻換下一把。
@@ -331,7 +332,7 @@ AIPAR-ETA/
 - Node.js 24 Active LTS（Krypton），≥ 24.12 以 type stripping 直接跑 `.ts`，無建置步驟
 - PostgreSQL 18.6（`postgres:18.6-alpine`；19 當時仍為 beta）
 - discord.js 14.27、`pg` 8.23
-- 映像：`web`／`bot` 共用 `aipar-eta:app`（`node:24-bookworm-slim`，非 root `node`，`COPY logo ./logo`）；OCR 另建 `aipar-eta:ocr`
+- 映像：`web`／`bot` 共用 `aiparc-eta:app`（`node:24-bookworm-slim`，非 root `node`，`COPY logo ./logo`）；OCR 另建 `aiparc-eta:ocr`
 - 編排檔：`compose.yaml`（Compose Specification，不含過時的 `version` 欄）；`postgres` 與 `ocr` 埠只綁 `127.0.0.1`
 - 品牌色取自標誌：金 `#eabf29`、藍 `#259fc8`（網站與 Embed 共用）
 
@@ -350,5 +351,5 @@ AIPAR-ETA/
 ---
 
 <p align="center">
-  <sub>AIPAR ETA　·　實驗室伙食系統　·　台北時間</sub>
+  <sub>AIPARC ETA　·　實驗室伙食系統　·　台北時間</sub>
 </p>

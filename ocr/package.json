@@ -1,8 +1,8 @@
 {
-  "name": "aipar-eta-ocr",
+  "name": "aiparc-eta-ocr",
   "private": true,
   "type": "module",
-  "description": "AIPAR ETA 菜單對帳 OCR（PP-OCRv6 small，獨立容器）",
+  "description": "AIPARC ETA 菜單對帳 OCR（PP-OCRv6 small，獨立容器）",
   "engines": {
     "node": ">=24.12.0"
   },

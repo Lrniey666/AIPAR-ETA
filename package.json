@@ -1,9 +1,9 @@
 {
-  "name": "aipar-eta",
+  "name": "aiparc-eta",
   "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "實驗室伙食系統 AIPAR ETA",
+  "description": "實驗室伙食系統 AIPARC ETA",
   "engines": {
     "node": ">=24.12.0"
   },

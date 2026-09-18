@@ -164,7 +164,7 @@ const TABLE = {
   ],
   "setup.not_forum": ["{channel} 不是論壇頻道。", "{channel} is not a forum channel."],
 
-  "help.title": ["AIPAR ETA 使用說明", "AIPAR ETA — how to use"],
+  "help.title": ["AIPARC ETA 使用說明", "AIPARC ETA — how to use"],
   "help.body": [
     "**建檔**　`/餐廳 新增` 建立餐廳；`/菜單 上傳` 丟菜單照片辨識，或 `/菜單 輸入` 人工貼上。\n**揪團**　`/揪團` 選餐廳開一則論壇貼文，Bot 會自動貼菜單與彙總。\n**點餐**　在貼文裡按「點餐」用下拉選，或直接打「我要一個雞腿飯加紅茶」。\n**結算**　`/結算` 產生每人應付並寫入帳本；`/帳務 我的` 看自己欠多少。\n\n直接 @ 我也可以用自然語言問「聞香來有什麼」這類問題。",
     "**Set up** `/restaurant add` registers a place; `/menu upload` reads a photo, `/menu input` takes typed text.\n**Group order** `/groupbuy` opens a forum post; the bot posts the menu and keeps the summary updated.\n**Ordering** Press *Order* in the post to pick from a dropdown, or just type “one chicken rice and a tea”.\n**Settling** `/settle` works out who owes what and writes it to the ledger; `/ledger mine` shows your balance.\n\nYou can also mention me and ask in plain language.",

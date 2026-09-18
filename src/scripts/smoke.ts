@@ -52,7 +52,7 @@ function step(label: string, detail: string): void {
 }
 
 try {
-  console.log(`AIPAR ETA 煙霧測試　${format_datetime()}`);
+  console.log(`AIPARC ETA 煙霧測試　${format_datetime()}`);
 
   await run_migrations(pool);
   step("資料結構", "遷移已套用");

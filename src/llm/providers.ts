@@ -4,7 +4,8 @@
 // 規則：
 //   1. 沒填金鑰＝跳過這家，不是錯誤。
 //   2. 有金鑰但沒填模型 ID＝跳過並記原因，不拿猜的 ID 去打 404。
-//   3. 計費型服務（iAI 按 token 計費）預設關閉，要 LLM_ALLOW_METERED=true 才納入。
+//   3. 標成 metered 的供應商預設關閉，要 LLM_ALLOW_METERED=true 才納入。
+//      iAI（高科大）是校內免費層，不標 metered。
 
 export type ProviderKey = "groq" | "gemini" | "mistral" | "iai" | "local";
 
@@ -103,7 +104,7 @@ const SPECS: ProviderSpec[] = [
     model_env: "IAI_MODEL",
     vision_model_env: "IAI_VISION_MODEL",
     supports_vision: true,
-    metered: true,
+    metered: false,
     timeout_ms: 90_000,
     extra_body: {},
     requires_key: true,

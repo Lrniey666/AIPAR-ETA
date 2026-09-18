@@ -77,7 +77,7 @@ const server = createServer((req, res) => {
         send_json(res, 200, {
           ok: true,
           service: "ocr",
-          name: "AIPAR ETA OCR",
+          name: "AIPARC ETA OCR",
           model: MODEL_NAME,
           ready: models_ready(),
         });

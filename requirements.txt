@@ -1,4 +1,4 @@
-# AIPAR ETA — Python 相依清單
+# AIPARC ETA — Python 相依清單
 # 最後核對：2026-09-18（台北時間，對齊 CHANGELOG Unreleased）
 #
 # 現況：執行時期為 Node.js 24 Active LTS，應用程式在 src/*.ts。

@@ -1,6 +1,6 @@
-# AIPAR ETA 通用介紹簡報
+# AIPARC ETA 通用介紹簡報
 
-15 頁、16:9。投影片檔：[`AIPAR-ETA-intro.pptx`](./AIPAR-ETA-intro.pptx)。
+15 頁、16:9。投影片檔：[`AIPARC-ETA-intro.pptx`](./AIPARC-ETA-intro.pptx)。
 技術專有名詞依出現順序見 [`glossary.md`](./glossary.md)。重新產出：`python docs/presentations/build_pptx.py`。
 
 畫面來源：
@@ -12,7 +12,7 @@
 
 ## 第 1 頁｜封面
 
-**標題**　AIPAR ETA  
+**標題**　AIPARC ETA  
 **副標**　實驗室伙食系統  
 **一句話**　把餐廳菜單、論壇揪團與帳本收進同一套系統。寫入走 Discord，查閱走校內網站。  
 **頁尾**　通用介紹 · 2026-09-18 · 台北時間
@@ -50,7 +50,7 @@
 
 ## 第 4 頁｜一句話
 
-**標題**　AIPAR ETA 是實驗室內部的伙食系統
+**標題**　AIPARC ETA 是實驗室內部的伙食系統
 
 Discord 建檔、揪團、點餐、結算；校內網站只負責查閱。  
 金額由程式依庫內價格計算，模型不得自行定價。

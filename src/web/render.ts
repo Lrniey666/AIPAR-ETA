@@ -52,7 +52,7 @@ function nav_html(active: string | undefined): string {
   return `<nav class="nav" aria-label="主要導覽">
   <a class="nav__brand" href="/">
     <img src="/assets/logo.svg" alt="" width="34" height="30" aria-hidden="true">
-    <span>AIPAR ETA<small>實驗室伙食系統</small></span>
+    <span>AIPARC ETA<small>實驗室伙食系統</small></span>
   </a>
   <div class="nav__links">${links}</div>
   <button id="theme-toggle" class="theme-toggle" type="button"
@@ -69,7 +69,7 @@ export function layout(options: PageOptions): string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>${escape_html(options.title)}｜AIPAR ETA</title>
+<title>${escape_html(options.title)}｜AIPARC ETA</title>
 <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
 <script>${THEME_BOOT_SCRIPT}</script>
 <style>${STYLE}</style>
@@ -84,7 +84,7 @@ ${nav_html(options.active)}
 ${options.body}
 </main>
 <footer>
-  <span>實驗室伙食系統 AIPAR ETA．資料寫入一律經由 Discord bot，本站唯讀。</span>
+  <span>實驗室伙食系統 AIPARC ETA．資料寫入一律經由 Discord bot，本站唯讀。</span>
   <span>更新於 ${escape_html(options.generated_at)}（台北時間）</span>
 </footer>
 <script>${THEME_TOGGLE_SCRIPT}</script>

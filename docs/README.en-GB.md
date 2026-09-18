@@ -4,10 +4,10 @@
 </p>
 
 <p align="center">
-  <img src="assets/hero.svg" alt="AIPAR ETA" width="760">
+  <img src="assets/hero.svg" alt="AIPARC ETA" width="760">
 </p>
 
-<h1 align="center">AIPAR ETA</h1>
+<h1 align="center">AIPARC ETA</h1>
 
 <p align="center">
   <strong>Laboratory meals system</strong><br>
@@ -39,7 +39,7 @@
 
 ---
 
-Lunch orders should not live across ten Discord messages. AIPAR ETA keeps restaurants, forum group-buys, and the ledger in one system: **writes go through the Discord bot**, **reads go through the campus website**, and **state lives in PostgreSQL**. Natural language and menu-image recognition use **free LLM APIs only**. Menu-reconciliation OCR (PP-OCRv6 small) is this repo’s `ocr/` sidecar and starts with Compose; it is skipped only when `OCR_BASE_URL` is unset *and* you are not using Compose. With no keys at all, buttons and dropdowns still work.
+Lunch orders should not live across ten Discord messages. AIPARC ETA keeps restaurants, forum group-buys, and the ledger in one system: **writes go through the Discord bot**, **reads go through the campus website**, and **state lives in PostgreSQL**. Natural language and menu-image recognition use **free LLM APIs only**. Menu-reconciliation OCR (PP-OCRv6 small) is this repo’s `ocr/` sidecar and starts with Compose; it is skipped only when `OCR_BASE_URL` is unset *and* you are not using Compose. With no keys at all, buttons and dropdowns still work.
 
 > **Status (0.2.0 + Unreleased).** The three product features shipped in 0.2.0. This round follows `PLAN/AEPARC_EAT_Revise_1.md`: in-repo OCR, plain-language cancel / ledger / recommend, who-owes-whom, conversation memory, anti-hallucination, and a themed dashboard.
 > **77** offline tests, `npm run smoke`, `npm run route:check` and the local website pages have passed. **Live Discord use has not been signed off** (including `/memory`). The command table changed — run `npm run register` after deploy.
@@ -150,7 +150,7 @@ flowchart LR
   L -.-> B
 ```
 
-Both entry points share the database and **never write SQL themselves**: `bot` and `web` call `db/` and `domain/` only. The LLM gateway speaks the OpenAI-compatible wire format. Switching provider means changing `base_url`, the key, and the model id — no LLM SDK is imported. OCR is this repo’s `ocr/` sidecar (`aipar-eta:ocr`); **do not run it inside the bot process**. `web` and `bot` share the `aipar-eta:app` image.
+Both entry points share the database and **never write SQL themselves**: `bot` and `web` call `db/` and `domain/` only. The LLM gateway speaks the OpenAI-compatible wire format. Switching provider means changing `base_url`, the key, and the model id — no LLM SDK is imported. OCR is this repo’s `ocr/` sidecar (`aiparc-eta:ocr`); **do not run it inside the bot process**. `web` and `bot` share the `aiparc-eta:app` image.
 
 | Layer | Directory | May depend on |
 | --- | --- | --- |
@@ -221,7 +221,7 @@ Campus 24/7 hosting, backups, and week-long uptime notes: [`DEPLOY.md`](../DEPLO
 ## Project structure
 
 ```text
-AIPAR-ETA/
+AIPARC-ETA/
 ├── src/
 │   ├── web.ts / bot.ts     process entry points
 │   ├── config.ts           env loader (missing required names fail fast)
@@ -296,16 +296,17 @@ JSON amounts are in **New Taiwan dollars**, not cents. Non-GET methods return 40
 
 | Variable | Required | Notes |
 | --- | --- | --- |
-| `POSTGRES_*` | yes | Inside Compose, `POSTGRES_HOST` is overwritten to `postgres` |
+| `POSTGRES_*` | yes | Inside Compose, `POSTGRES_HOST` is overwritten to `postgres` and `POSTGRES_PORT` to `5432`. The host mapping still uses `.env` `POSTGRES_PORT` |
 | `APP_HOST` / `APP_PORT` | | website, default `0.0.0.0:3000` |
 | `BOT_HEALTH_PORT` | | bot health, default `3001` |
 | `TZ` | | default `Asia/Taipei` |
 | `DISCORD_BOT_TOKEN` / `DISCORD_CLIENT_ID` | to run the bot | omit = no Discord connection, no command registration |
 | `*_API_KEYS` | | comma-separated; blank skips that provider |
 | `*_MODEL` / `*_VISION_MODEL` | | a key without a model id is skipped on purpose — never guess |
-| `LLM_ALLOW_METERED` | | `true` enables the metered provider (iAI); off by default |
+| `LLM_ALLOW_METERED` | | `true` enables providers marked metered; iAI is a free campus gateway and does not need this flag |
 | `PUBLIC_BASE_URL` | | the site's address; used for embed logos and the `/website` button |
-| `OCR_BASE_URL` | | menu cross-check OCR. Compose overwrites this to `http://ocr:8868` |
+| `OCR_BASE_URL` | | menu cross-check OCR. Compose overwrites this to `http://ocr:8868`; on the host, point at `http://127.0.0.1:<OCR_HOST_PORT>` |
+| `OCR_HOST_PORT` | | host mapping for OCR, default `8868`; the container still listens on `8868` |
 | `OCR_TIMEOUT_MS` | | Compose sets 60000; the code default is 20000 |
 | `LOCAL_LLM_BASE_URL` | | local fallback; do not run a local model inside the container |
 
@@ -316,7 +317,7 @@ See [`.env.example`](../.env.example). Never commit `.env` or bake it into the i
 <details>
 <summary>LLM gateway and two hard rules</summary>
 
-Order of attempt: Groq (text) → Gemini (vision) → Mistral → local. Metered iAI stays off unless `LLM_ALLOW_METERED=true`.
+Order of attempt: Groq (text) → Gemini (vision) → Mistral → iAI → local. iAI is a free campus gateway.
 
 - An **empty reply, or JSON that cannot be parsed**, counts as failure and the next provider is tried (Gemini’s free tier often spends `max_tokens` on thinking, or returns unparseable text).
 - 429 / 5xx: retry the same key once, then fail over. 401 / 403: skip that key immediately.
@@ -332,7 +333,7 @@ Hard rules: unit prices always come from `menu_items`; a matching rule means the
 - Node.js 24 Active LTS (Krypton), ≥ 24.12, type stripping, no build step
 - PostgreSQL 18.6 (`postgres:18.6-alpine`; 19 was still beta at the time)
 - discord.js 14.27, `pg` 8.23
-- Images: `web` / `bot` share `aipar-eta:app` (`node:24-bookworm-slim`, non-root `node`, `COPY logo ./logo`); OCR builds `aipar-eta:ocr`
+- Images: `web` / `bot` share `aiparc-eta:app` (`node:24-bookworm-slim`, non-root `node`, `COPY logo ./logo`); OCR builds `aiparc-eta:ocr`
 - Compose file: `compose.yaml` (Compose Specification; no obsolete `version` key); `postgres` and `ocr` ports bound to `127.0.0.1`
 - Brand colours from the mark: gold `#eabf29`, blue `#259fc8` (website and embeds share them)
 
@@ -351,5 +352,5 @@ In short: `snake_case` for variables and functions; maintainer comments in Tradi
 ---
 
 <p align="center">
-  <sub>AIPAR ETA　·　laboratory meals　·　Asia/Taipei</sub>
+  <sub>AIPARC ETA　·　laboratory meals　·　Asia/Taipei</sub>
 </p>

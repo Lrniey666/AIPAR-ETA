@@ -48,7 +48,7 @@ const health = start_health_server("0.0.0.0", config.bot_health_port, "bot", asy
   return {
     ok: true,
     service: "bot",
-    name: "AIPAR ETA",
+    name: "AIPARC ETA",
     timezone: config.timezone,
     discord_configured: Boolean(config.discord.bot_token),
     discord_ready: is_discord_ready(),

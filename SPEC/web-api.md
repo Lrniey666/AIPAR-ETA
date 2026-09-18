@@ -41,7 +41,7 @@ SVG 原稿是 A4 版面、圖形置中，讀檔時會把 `viewBox` 換成貼齊�
 
 | 項目 | 作法 |
 | --- | --- |
-| 深／淺色 | 預設跟隨 `prefers-color-scheme`；按過切換鈕後改以使用者選擇為準，存 `localStorage` |
+| 深／淺色 | 預設跟隨 `prefers-color-scheme`；按過切換鈕後改以使用者選擇為準，存 `localStorage` 鍵 `aiparc-eta-theme` |
 | 閃白 | `<head>` 裡一小段同步腳本先把 `data-theme` 補上 |
 | 切換轉場 | View Transitions API，從按鈕為圓心向外擴散的圓形遮罩（`clip-path: circle()`，520ms） |
 | 沒有 View Transitions | 直接換色，不做退化動畫——半套的動畫比沒有更難看 |

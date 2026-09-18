@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
-  <title id="title">AIPAR ETA</title>
+  <title id="title">AIPARC ETA</title>
   <desc id="desc">Laboratory meals system — Discord bot, campus website, PostgreSQL, free LLM APIs.</desc>
   <defs>
     <linearGradient id="wash" x1="0" y1="0" x2="1" y2="1">
@@ -39,7 +39,7 @@
     <path fill="#259fc8" d="M168.18,527.71s111.06-20.68,216.77-96.51c105.7-75.83,97.28-91.91,97.28-91.91,0,0-3.83,52-18.38,87.32,0,0-26.47,63.74-77.53,94.21-51.06,30.47-87.83,38.3-146.04,30.64s-72.09-23.74-72.09-23.74Z"/>
     <path fill="#4ab4ce" d="M267.48,496.08c-57.11,23.78-99.3,31.64-99.3,31.64,0,0,13.87,16.09,72.09,23.74,28.58,3.76,51.98,3.78,74.45-.77-18.51-15.52-34.49-33.96-47.23-54.61Z"/>
   </svg>
-  <text class="title" x="232" y="142">AIPAR ETA</text>
+  <text class="title" x="232" y="142">AIPARC ETA</text>
   <line class="rule" x1="232" y1="168" x2="304" y2="168"/>
   <text class="tag" x="232" y="204">Laboratory meals · Discord bot · campus website · free LLM APIs</text>
   <g transform="translate(232 248)">
