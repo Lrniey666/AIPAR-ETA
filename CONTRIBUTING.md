@@ -47,3 +47,7 @@
 6. 斜線指令定義有變 → `npm run register`
 
 對外說明（Hero、安裝、結構）寫在 [`README.md`](README.md)；校內部屬寫在 [`DEPLOY.md`](DEPLOY.md)。
+
+## 授權
+
+本專案**程式與文件**以 MIT 授權，全文在根目錄 [`LICENSE`](LICENSE)。實驗室 AIPARC 的名稱與組織標誌不在授權範圍，見 [`TRADEMARKS.md`](TRADEMARKS.md)。`"private": true` 只表示不要發到 npm，不是「未授權」。

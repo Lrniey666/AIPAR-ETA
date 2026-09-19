@@ -47,3 +47,7 @@ Ask first for irreversible work (dropping volumes, `compose down -v`, push, glob
 6. Slash-command definitions → `npm run register`
 
 The public-facing introduction is [`README.md`](../README.md) / [`README.en.md`](README.en.md). Campus hosting is [`DEPLOY.md`](../DEPLOY.md).
+
+## Licence
+
+**Code and documentation** are MIT-licensed; the full text is in the root [`LICENSE`](../LICENSE). The laboratory name AIPARC and the organisation logos are not licensed; see [`TRADEMARKS.md`](../TRADEMARKS.md). `"private": true` only means do not publish to npm; it is not a copyright statement.

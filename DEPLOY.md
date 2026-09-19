@@ -23,7 +23,8 @@ docker compose ps
 
 校內裝置連線：`http://<伺服器校內IP>:3000/`
 
-若要改埠，只改 `.env` 的 `APP_PORT` 後再 `docker compose up -d`。
+若要改網站埠，改 `.env` 的 `APP_PORT` 後再 `docker compose up -d`。
+本機若 `5432`／`8868` 已被其他容器占用，改 `POSTGRES_PORT`／`OCR_HOST_PORT` 即可；容器內 postgres 仍聽 `5432`、OCR 仍聽 `8868`。
 
 ## 上線後的第一次檢查
 
@@ -61,9 +62,22 @@ docker compose exec bot node src/scripts/register-commands.ts
 備份資料卷（在專案根目錄執行，勿把輸出提交到 Git）：
 
 ```bash
-docker run --rm -v aipar-eta_postgres_data:/volume -v "${PWD}:/backup" alpine \
+docker run --rm -v aiparc-eta_postgres_data:/volume -v "${PWD}:/backup" alpine \
   tar czf /backup/postgres-backup.tgz -C /volume .
 ```
+
+Compose 專案名從 `aipar-eta` 改成 `aiparc-eta` 之後，新的資料卷會叫 `aiparc-eta_postgres_data`。
+若主機上還有舊卷 `aipar-eta_postgres_data`，先停服務再改掛，**不要** `docker compose down -v`：
+
+```bash
+docker volume create aiparc-eta_postgres_data
+docker run --rm \
+  -v aipar-eta_postgres_data:/from \
+  -v aiparc-eta_postgres_data:/to \
+  alpine sh -c "cd /from && tar c . | tar x -C /to"
+```
+
+本機 `.env` 若仍寫舊的 `POSTGRES_DB=aipar_eta`／`POSTGRES_USER=aipar` 可繼續用；只有新環境才跟 `.env.example` 用 `aiparc_eta`／`aiparc`。
 
 ## 連續運行一週的注意事項
 

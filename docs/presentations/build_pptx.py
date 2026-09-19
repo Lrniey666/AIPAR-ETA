@@ -1,4 +1,4 @@
-# 產生 AIPAR ETA 通用介紹簡報（widescreen 16:9）。
+# 產生 AIPARC ETA 通用介紹簡報（widescreen 16:9）。
 # 執行：python docs/presentations/build_pptx.py
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from pptx.util import Inches, Pt
 
 HERE = Path(__file__).resolve().parent
 ASSETS = HERE / "assets"
-OUT = HERE / "AIPAR-ETA-intro.pptx"
+OUT = HERE / "AIPARC-ETA-intro.pptx"
 FONT = "Microsoft JhengHei"
 
 PAPER = RGBColor(0xF7, 0xF6, 0xF2)
@@ -136,7 +136,7 @@ def trim_png(name: str, bg: tuple[int, int, int], pad: int = 28) -> None:
 
 def footer(slide, page: int) -> None:
     add_shape(slide, 0.55, 7.18, 12.2, 0.015, LINE)
-    textbox(slide, 0.55, 7.22, 4.5, 0.24, "AIPAR ETA", 10, False, MUTED)
+    textbox(slide, 0.55, 7.22, 4.5, 0.24, "AIPARC ETA", 10, False, MUTED)
     textbox(slide, 5.0, 7.22, 4.0, 0.24, "實驗室伙食系統", 10, False, MUTED, PP_ALIGN.CENTER)
     textbox(slide, 10.4, 7.22, 2.3, 0.24, f"{page:02d}  /  {TOTAL:02d}", 10, False, MUTED, PP_ALIGN.RIGHT)
 
@@ -168,7 +168,7 @@ def slide_01(prs) -> None:
     add_shape(slide, 0, 0, 0.18, 7.5, GOLD)
     add_shape(slide, 0, 7.18, 13.333, 0.32, GOLD)
     picture(slide, "logo.png", 0.7, 1.15, 1.7, 1.5)
-    textbox(slide, 0.7, 2.85, 11.5, 0.85, "AIPAR ETA", 54, True, WHITE)
+    textbox(slide, 0.7, 2.85, 11.5, 0.85, "AIPARC ETA", 54, True, WHITE)
     textbox(slide, 0.7, 3.7, 11.5, 0.45, "實驗室伙食系統", 24, False, GOLD)
     textbox(
         slide, 0.7, 4.4, 10.5, 0.8,
@@ -215,7 +215,7 @@ def slide_03(prs) -> None:
 
 
 def slide_04(prs) -> None:
-    slide = content(prs, "一句話", "AIPAR ETA 是實驗室內部的伙食系統", 4)
+    slide = content(prs, "一句話", "AIPARC ETA 是實驗室內部的伙食系統", 4)
     add_round(slide, 0.55, 1.4, 12.2, 1.7, WHITE)
     textbox(
         slide, 0.85, 1.7, 11.6, 1.15,
@@ -405,7 +405,7 @@ def slide_15(prs) -> None:
         18, False, RGBColor(0xE9, 0xE7, 0xE2),
     )
     textbox(slide, 0.7, 5.5, 11, 0.4, "問題歡迎現在提。", 16, False, GOLD)
-    textbox(slide, 0.7, 6.55, 11, 0.35, "AIPAR ETA  ·  實驗室伙食系統  ·  2026-09-18", 12, False, RGBColor(0xA3, 0xA8, 0xB0))
+    textbox(slide, 0.7, 6.55, 11, 0.35, "AIPARC ETA  ·  實驗室伙食系統  ·  2026-09-18", 12, False, RGBColor(0xA3, 0xA8, 0xB0))
     notes(slide, "收束到三句：確認菜單、對到品項、程式算錢。留下時間問指令或網站怎麼開。")
 
 

@@ -67,16 +67,15 @@ test("供應商：逗號分隔的多把金鑰都要收進輪替", () => {
   assert.deepEqual(registry.text[0]?.api_keys, ["key-1", "key-2", "key-3"]);
 });
 
-test("供應商：計費服務預設不啟用，要明確開旗標", () => {
+test("供應商：iAI 為免費層，有金鑰與模型 ID 即納入", () => {
   process.env.IAI_API_KEYS = "key-1";
   process.env.IAI_MODEL = "Furen-std";
 
-  const blocked = load_providers();
-  assert.equal(blocked.text.length, 0);
-  assert.match(blocked.skipped.find((item) => item.key === "iai")?.reason ?? "", /LLM_ALLOW_METERED/);
-
-  process.env.LLM_ALLOW_METERED = "true";
-  assert.equal(load_providers().text.length, 1);
+  const registry = load_providers();
+  assert.equal(registry.text.length, 1);
+  assert.equal(registry.text[0]?.key, "iai");
+  assert.equal(registry.vision.length, 1);
+  assert.equal(registry.vision[0]?.key, "iai");
 });
 
 test("供應商：不支援視覺的那家不會被排進視覺佇列", () => {

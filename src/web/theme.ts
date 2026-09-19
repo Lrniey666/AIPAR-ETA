@@ -11,7 +11,7 @@
 //           避免大面積圓形擴散引發暈眩。
 
 /** 深淺色會在整份 CSS 裡被引用，抽成變數才不會兩邊改到不一致。 */
-export const THEME_STORAGE_KEY = "aipar-eta-theme";
+export const THEME_STORAGE_KEY = "aiparc-eta-theme";
 
 export const STYLE = `
 :root {

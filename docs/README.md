@@ -6,6 +6,8 @@
 | --- | --- | --- |
 | [../README.md](../README.md) | 繁體中文 | 專案介紹、功能、示範、架構、安裝、結構 |
 | [README.en.md](./README.en.md) | English | 同上的英文對照 |
+| [../LICENSE](../LICENSE) | English | MIT 授權全文（程式與文件） |
+| [../TRADEMARKS.md](../TRADEMARKS.md) | 繁體中文／English | AIPARC 名稱與組織標誌 |
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | 繁體中文 | 怎麼改這個 Repository |
 | [CONTRIBUTING.en.md](./CONTRIBUTING.en.md) | English | Contributing |
 | [presentations/](./presentations/README.md) | 繁體中文 | 通用介紹簡報、講稿與技術專有名詞 |

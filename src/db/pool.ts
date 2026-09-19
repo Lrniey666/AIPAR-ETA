@@ -21,7 +21,7 @@ export function create_pool(config: AppConfig): Db {
     connectionTimeoutMillis: 5000,
     idleTimeoutMillis: 10_000,
     max: 8,
-    application_name: "aipar-eta",
+    application_name: "aiparc-eta",
   });
 }
 

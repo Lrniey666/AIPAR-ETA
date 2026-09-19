@@ -15,7 +15,7 @@
 | `groq` | `https://api.groq.com/openai/v1` | 視模型而定 | 延遲最低，排文字第一棒。預設帶 `reasoning_effort=low`，避免思考吃光 `max_tokens`。 |
 | `gemini` | `https://generativelanguage.googleapis.com/v1beta/openai` | ✓ | 免費層裡中文菜單辨識最穩，排視覺第一棒。 |
 | `mistral` | `https://api.mistral.ai/v1` | ✓ | 月額度大但約 1 req/s，適合批次不適合高併發。 |
-| `iai` | `https://www.iai.nkust.edu.tw/aihub/v1` | ✓ | **按 token 計費，不是免費層**，預設關閉。 |
+| `iai` | `https://www.iai.nkust.edu.tw/aihub/v1` | ✓ | 高科大校內閘道，免費層。填金鑰與模型 ID 即納入。 |
 | `local` | 由 `LOCAL_LLM_BASE_URL` 指定 | ✓ | 本機 Ollama 之類的保底，排最後。 |
 
 ### 三條略過規則
@@ -23,7 +23,7 @@
 1. **沒填金鑰＝略過**，不是錯誤。0 家、1 家、N 家都要能正常啟動。
 2. **有金鑰但沒填模型 ID＝略過並記原因**，不拿猜的 ID 去打 404。免費層模型會下架改名，
    `.env.example` 因此刻意不給「保證可用」的預設值。
-3. **計費服務預設關閉**。PLAN 要求只用免費 API，`iai` 要 `LLM_ALLOW_METERED=true` 才會被納入。
+3. **標成計費的供應商預設關閉**。目前沒有計費供應商；`iai` 為校內免費層。之後若接入計費 API，要 `LLM_ALLOW_METERED=true`。
 
 被略過的供應商與原因會出現在啟動日誌與 `GET /health`。
 
@@ -198,7 +198,7 @@ npm run route:check
 安靜退回純視覺流程，不讓整支 `/菜單 上傳` 失敗。
 
 本 Repository 的 OCR 服務在 `ocr/`：PP-OCRv6 small 的 ONNX 權重放 `ocr/models/`，
-HTTP 入口是 `POST /ocr`，Compose 服務名 `ocr`（映像 `aipar-eta:ocr`）。
+HTTP 入口是 `POST /ocr`，Compose 服務名 `ocr`（映像 `aiparc-eta:ocr`）。
 **不要跑在 bot 容器裡**，也不要在執行期去讀研究 Repository 路徑。
 權重遺失時在 `ocr/` 跑 `node scripts/fetch-models.ts`。
 
@@ -210,6 +210,6 @@ npm run llm:check
 
 每家送一次極短請求（文字一次、視覺一次），印出延遲與錯誤原因。
 「`.env` 填了」不等於「打得到」，上線前與部署後都該跑一次。
-計費供應商預設被擋掉，這支不會誤打。
+目前沒有計費供應商；iAI 有金鑰就會被打到。`LLM_ALLOW_METERED` 只擋之後標成計費的供應商。
 
 OCR 的狀態（有沒有啟用、指到哪個服務）印在 bot 啟動日誌，也在 `GET /health` 的 `ocr` 欄位。

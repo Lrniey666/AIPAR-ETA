@@ -162,7 +162,7 @@ export const EXTRA_STRINGS = {
     "Only the last 40 messages are kept, and long-term notes are only what you explicitly asked me to remember. `/memory forget` removes them.",
   ],
 
-  "website.title": ["AIPAR ETA 網站", "AIPAR ETA website"],
+  "website.title": ["AIPARC ETA 網站", "AIPARC ETA website"],
   "website.body": [
     "餐廳、菜單、揪團紀錄與帳務都查得到，也有深淺色主題可以切換。",
     "Restaurants, menus, group orders and the ledger — with a light and dark theme.",

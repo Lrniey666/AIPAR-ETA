@@ -1,25 +1,25 @@
 # 基礎設施
 
-最後更新：2026-09-18（台北時間）
+最後更新：2026-09-19（台北時間）
 
 ## 執行拓樸
 
-Compose 專案名稱：`aipar-eta`
+Compose 專案名稱：`aiparc-eta`（舊名 `aipar-eta`；既有資料卷遷移見 `DEPLOY.md`）
 
 | 服務 | 映像／建置 | 對外埠 | 職責 |
 | --- | --- | --- | --- |
-| `postgres` | `postgres:18.6-alpine` | `127.0.0.1:5432` | 主資料庫。只綁本機，不對校園網開放。 |
-| `ocr` | `aipar-eta:ocr`（本 Repository `ocr/Dockerfile`） | `127.0.0.1:8868` | 菜單對帳 OCR（PP-OCRv6 small ONNX）。權重在 `ocr/models/`。 |
-| `web` | `aipar-eta:app`（本 Repository `Dockerfile`） | `${APP_PORT:-3000}` | 網站／API。校內裝置可連這一個埠。啟動 `src/web.ts`。 |
+| `postgres` | `postgres:18.6-alpine` | `127.0.0.1:${POSTGRES_PORT:-5432}` | 主資料庫。只綁本機，不對校園網開放。容器內仍聽 `5432`。 |
+| `ocr` | `aiparc-eta:ocr`（本 Repository `ocr/Dockerfile`） | `127.0.0.1:${OCR_HOST_PORT:-8868}` | 菜單對帳 OCR（PP-OCRv6 small ONNX）。權重在 `ocr/models/`。容器內仍聽 `8868`。 |
+| `web` | `aiparc-eta:app`（本 Repository `Dockerfile`） | `${APP_PORT:-3000}` | 網站／API。校內裝置可連這一個埠。啟動 `src/web.ts`。 |
 | `bot` | 同上；啟動 `src/bot.ts` | 無對外埠 | Discord bot。只對內做健康檢查。 |
 
-`web` 與 `bot` 必須寫同一個 `image:`（`aipar-eta:app`）。Compose 沒指定名稱時會依服務編成 `aipar-eta-web`／`aipar-eta-bot` 兩筆，內容幾乎相同、映像 ID 不同。`pull_policy: build` 避免誤去 Docker Hub 拉同名公開映像。
+`web` 與 `bot` 必須寫同一個 `image:`（`aiparc-eta:app`）。Compose 沒指定名稱時會依服務編成 `aiparc-eta-web`／`aiparc-eta-bot` 兩筆，內容幾乎相同、映像 ID 不同。`pull_policy: build` 避免誤去 Docker Hub 拉同名公開映像。
 
-網路：`aipar-eta-net`
+網路：`aiparc-eta-net`
 資料卷：`postgres_data` → 容器內 `/var/lib/postgresql`（PostgreSQL 18+ 官方映像的新預設路徑）
 
-`web` 與 `bot` 進入容器後，`POSTGRES_HOST` 一律覆寫成 `postgres`，避免誤用本機迴環位址。
-`bot` 的 `OCR_BASE_URL` 一律覆寫成 `http://ocr:8868`（同 Compose 網路），**不要填 127.0.0.1**——那會指到 bot 容器自己。本機直接跑 `npm run start:bot` 才用 `http://127.0.0.1:8868`。
+`web` 與 `bot` 進入容器後，`POSTGRES_HOST` 一律覆寫成 `postgres`、`POSTGRES_PORT` 一律覆寫成 `5432`，避免誤用本機迴環位址或把主機對映埠拿去打容器內的 postgres。
+`bot` 的 `OCR_BASE_URL` 一律覆寫成 `http://ocr:8868`（同 Compose 網路），**不要填 127.0.0.1**——那會指到 bot 容器自己。本機直接跑 `npm run start:bot` 才用 `http://127.0.0.1:${OCR_HOST_PORT:-8868}`。
 
 兩個服務啟動時都會自己跑一次資料庫遷移（`src/db/migrate.ts`），不需要額外的遷移步驟。
 
@@ -42,8 +42,10 @@ Compose 專案名稱：`aipar-eta`
 | 變數 | 必要 | 說明 |
 | --- | --- | --- |
 | `POSTGRES_*` | ✓ | 資料庫連線 |
-| `APP_HOST` / `APP_PORT` | | 網站監聽位址，預設 `0.0.0.0:3000` |
-| `BOT_HEALTH_PORT` | | bot 健康檢查埠，預設 `3001` |
+| `APP_HOST` / `APP_PORT` | | 網站監聽位址，預設 `0.0.0.0:3000`。主機與容器用同一個埠。 |
+| `BOT_HEALTH_PORT` | | bot 健康檢查埠，預設 `3001`（Compose 不對主機公開） |
+| `POSTGRES_PORT` | | 主機對映 postgres 的埠，預設 `5432`。容器內固定連 `5432`。 |
+| `OCR_HOST_PORT` | | 主機對映 OCR 的埠，預設 `8868`。容器內固定聽 `8868`。 |
 | `TZ` | | 預設 `Asia/Taipei` |
 | `LOG_LEVEL` | | `debug` / `info` / `warn` / `error`，預設 `info` |
 | `PUBLIC_BASE_URL` | | 網站對外位址（校內 IP＋埠）。Embed 標誌與 `/網站` 的連結按鈕用它；留空＝不放圖、`/網站` 回「還沒設定」 |
@@ -52,10 +54,10 @@ Compose 專案名稱：`aipar-eta`
 | `DISCORD_GUILD_ID` | | 只註冊到單一伺服器（立即生效，開發用）；留空＝全域註冊 |
 | `*_API_KEYS` | | 逗號分隔的多把金鑰，留空＝略過該供應商 |
 | `*_MODEL` / `*_VISION_MODEL` | | 模型 ID；有金鑰但沒填模型就略過該供應商 |
-| `LLM_ALLOW_METERED` | | `true` 才啟用計費型供應商（iAI），預設關閉 |
+| `LLM_ALLOW_METERED` | | `true` 才啟用標成計費的供應商。iAI 為免費層，不需開此旗標 |
 | `LLM_TEXT_ORDER` / `LLM_VISION_ORDER` | | 覆寫供應商嘗試順序 |
 | `LOCAL_LLM_BASE_URL` / `LOCAL_LLM_MODEL` | | 本機模型保底（Ollama 等），留空＝不啟用 |
-| `OCR_BASE_URL` | | 菜單對帳 OCR（PP-OCRv6 small）的服務位址，留空＝整段略過 |
+| `OCR_BASE_URL` | | 菜單對帳 OCR（PP-OCRv6 small）的服務位址，留空＝整段略過。Compose 內的 bot 會被覆寫；本機直跑 bot 請填 `http://127.0.0.1:${OCR_HOST_PORT:-8868}` |
 | `OCR_PATH` / `OCR_API_KEY` / `OCR_MODEL` | | 端點路徑（預設 `/ocr`）、金鑰、模型名稱 |
 | `OCR_TIMEOUT_MS` / `OCR_MIN_SCORE` | | 逾時（程式預設 20000，Compose 覆寫 60000）與信心門檻（預設 0.6） |
 
@@ -86,5 +88,6 @@ Compose 專案名稱：`aipar-eta`
 ## Git
 
 - 預設分支：`main`
+- 授權：程式與文件為 MIT（根目錄 `LICENSE`；SPDX `MIT`）。實驗室 AIPARC 名稱與組織標誌不在 MIT 範圍，見 `TRADEMARKS.md`。
 - `.env`、憑證、金鑰不進版控
 - 文字檔統一 LF（`.gitattributes`）

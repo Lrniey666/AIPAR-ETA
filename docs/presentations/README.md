@@ -1,10 +1,10 @@
 # 介紹簡報
 
-給通用聽眾的 AIPAR ETA 介紹，不含系統缺陷或未完成項目。
+給通用聽眾的 AIPARC ETA 介紹，不含系統缺陷或未完成項目。
 
 | 檔案 | 內容 |
 | --- | --- |
-| [AIPAR-ETA-intro.pptx](./AIPAR-ETA-intro.pptx) | 15 頁投影片（PowerPoint／Google 簡報可開） |
+| [AIPARC-ETA-intro.pptx](./AIPARC-ETA-intro.pptx) | 15 頁投影片（PowerPoint／Google 簡報可開） |
 | [slides.md](./slides.md) | 依頁數寫的講稿與畫面說明 |
 | [glossary.md](./glossary.md) | 技術專有名詞（每條含白話、概念、定義、本專案用途），依投影片首次出現頁排序 |
 | [build_pptx.py](./build_pptx.py) | 重新產出 pptx |

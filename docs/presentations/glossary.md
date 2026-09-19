@@ -1,6 +1,6 @@
 # 技術專有名詞
 
-對照 [`slides.md`](./slides.md)／[`AIPAR-ETA-intro.pptx`](./AIPAR-ETA-intro.pptx)。  
+對照 [`slides.md`](./slides.md)／[`AIPARC-ETA-intro.pptx`](./AIPARC-ETA-intro.pptx)。  
 只收簡報裡出現、且具**技術意義**的詞。每條先給**白話**，再寫概念、定義與本專案用途。  
 依**頁數**與該頁**首次出現順序**排列；後頁再出現的同一詞不重複。
 
@@ -8,12 +8,12 @@
 
 ## 第 1 頁｜封面
 
-### AIPAR ETA（`aipar-eta`）
+### AIPARC ETA（`aiparc-eta`）
 
 - **白話**：這套系統的正式名字，程式與 Docker 也用同一組英文。
 - **概念**：本 Repository 的產品識別字。
-- **定義**：npm 套件名、Compose 專案名與對外標題。規劃別名「AIPARC EAT」不進程式識別字。
-- **本專案用途**：`package.json` 的 `name`、容器網路 `aipar-eta-net`、網站 `<title>` 與 Discord Embed 作者名。
+- **定義**：npm 套件名、Compose 專案名與對外標題。與規劃別名「AIPARC EAT」同一實驗室識別。
+- **本專案用途**：`package.json` 的 `name`、容器網路 `aiparc-eta-net`、網站 `<title>` 與 Discord Embed 作者名。
 
 ### Discord（寫入通道）
 
@@ -306,7 +306,7 @@
 
 - **白話**：淺色／深色可切；系統若要求減少動態，就直接換色不做動畫。
 - **概念**：CSS 變數切深淺色。
-- **定義**：預設 `prefers-color-scheme`；使用者選擇存 `localStorage` 鍵 `aipar-eta-theme`。切換用 View Transitions 圓形 `clip-path`。
+- **定義**：預設 `prefers-color-scheme`；使用者選擇存 `localStorage` 鍵 `aiparc-eta-theme`。切換用 View Transitions 圓形 `clip-path`。
 - **本專案用途**：`prefers-reduced-motion` 時關閉全部轉場與動畫，直接換色。
 
 ---
@@ -353,7 +353,7 @@
 - **白話**：對不同 AI 商家用同一種打電話方式，換一家只改網址和金鑰。
 - **概念**：供應商無關的 HTTP 用戶端。
 - **定義**：`src/llm/transport.ts` 用內建 `fetch`。不引 OpenAI／Google SDK。換手只換 `base_url`、金鑰清單、模型 ID。
-- **本專案用途**：Groq／Gemini／Mistral 註冊於 `providers.ts`。金鑰逗號分隔；空＝跳過該家。計費型預設關閉。
+- **本專案用途**：Groq／Gemini／Mistral／iAI 註冊於 `providers.ts`。金鑰逗號分隔；空＝跳過該家。標成計費的供應商預設關閉；iAI 為免費層。
 
 ### Groq／Gemini／Mistral
 
@@ -391,7 +391,7 @@
 
 - **白話**：預設只用免費的 AI，不在實驗室機器裡跑大型本機模型。
 - **概念**：閘道的預設計費約束。
-- **定義**：只用免費層。`LLM_ALLOW_METERED` 未開則擋計費供應商。
+- **定義**：只用免費層。iAI 為校內免費層。`LLM_ALLOW_METERED` 未開則擋標成計費的供應商。
 - **本專案用途**：實驗室機器不在容器內跑本機大模型。0／1／N 把金鑰都要能啟動。
 
 ---

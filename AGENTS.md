@@ -3,13 +3,13 @@
 > 給 AI Agent 與維護者：**先讀本檔 §1–2，再只開任務需要的檔案**。
 > 完整規格索引：`SPEC/README.md`。本檔不重複契約細節，只縮短找路成本。
 >
-> 最後更新：2026-09-18（對齊 `CHANGELOG.md` **Unreleased**；格式為 Keep a Changelog 2.0.0）
+> 最後更新：2026-09-19（對齊 `CHANGELOG.md` **Unreleased**；格式為 Keep a Changelog 2.0.0）
 
 ---
 
 ## 1. 這個專案是什麼
 
-**AIPAR ETA**（實驗室伙食系統）：實驗室內部用的 Discord bot＋校內網站＋PostgreSQL。規劃別名曾寫成「AIPARC EAT」；Repository、Compose、套件名稱一律是 `aipar-eta`／AIPAR ETA。
+**AIPARC ETA**（實驗室伙食系統）：實驗室內部用的 Discord bot＋校內網站＋PostgreSQL。規劃別名曾寫成「AIPARC EAT」；Repository、Compose、套件名稱一律是 `aiparc-eta`／AIPARC ETA。
 
 **現況**：`PLAN/plan_initial.md` 的三個功能在 0.2.0 全部落地——餐廳菜單建檔與查詢（含圖片辨識與人工輸入）、
 論壇貼文揪團點餐（按鈕／下拉與自然語言兩條路）、記帳與分攤結算；免費 LLM 閘道、schema 遷移、校內網站、離線測試都已就緒。
@@ -88,7 +88,7 @@
 3. `npm run check`（型別檢查＋離線測試）要全綠
 4. 動到資料流：`npm run smoke`（需要資料庫）
 5. 動到 LLM 設定：`npm run llm:check`（需要金鑰）
-6. 基礎設施改動：`docker compose up --build -d` 後四服務 `healthy`；`GET /health` 含資料庫時間；`GET http://127.0.0.1:8868/health` 為 OCR
+6. 基礎設施改動：`docker compose up --build -d` 後四服務 `healthy`；`GET /health` 含資料庫時間；OCR 探針為 `GET http://127.0.0.1:${OCR_HOST_PORT:-8868}/health`
 
 ---
 
@@ -158,6 +158,8 @@ shared ← db ← domain ← llm ← bot
 | `docs/README.md` | 說明文件索引 | 不知道該開哪一份時 |
 | `docs/presentations/` | 通用介紹簡報、講稿與技術專有名詞 | 口頭介紹專案時 |
 | `CONTRIBUTING.md` | 貢獻約定 | 要改程式或文件時 |
+| `LICENSE` | MIT 授權全文（程式與文件） | 改授權或著作權人時 |
+| `TRADEMARKS.md` | AIPARC 名稱與組織標誌保留 | 改品牌／名義政策時 |
 | `DEPLOY.md` | 校內 24/7 伺服器 | 部署／備份 |
 | `CHANGELOG.md` | Keep a Changelog 2.0.0；未發布寫 `Unreleased` | 每次改完 |
 | `.env.example` | 變數名與註解（無祕密） | 加設定項 |
@@ -200,7 +202,7 @@ shared ← db ← domain ← llm ← bot
 
 ## 6. LLM、視覺、外部研究
 
-- 只用免費 API，禁用付費服務。計費型供應商（iAI）預設被 `providers.ts` 擋下，要 `LLM_ALLOW_METERED=true` 才啟用。
+- 只用免費 API，禁用付費服務。iAI（高科大）為校內免費層，有金鑰即納入。`LLM_ALLOW_METERED` 仍擋之後若接入的計費供應商。
 - 金鑰清單式（逗號分隔多把）；某供應商留空＝跳過，不是啟動失敗。0／1／N 把都要能運作，`test/llm.test.ts` 有釘住。
 - 模型 ID 會下架、改名，且價目表 ≠ 打得到。有金鑰但沒填模型 ID 就跳過並記錄原因，**不要拿猜的 ID 去打**。採用前跑 `npm run llm:check` 查證。
 - 視覺（菜單圖）與文字模型分開設定；不支援視覺的供應商不會被排進視覺佇列。

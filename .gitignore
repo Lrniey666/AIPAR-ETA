@@ -14,6 +14,7 @@ npm-debug.log*
 
 # ---------------- Docker 本機資料（若改 bind mount） ----------------
 .docker-data/
+postgres-backup.tgz
 
 # ---------------- 簡報截圖暫存 ----------------
 docs/presentations/assets/_edge*/
