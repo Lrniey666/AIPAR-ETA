@@ -1,21 +1,21 @@
-<p align="center">
+<div align="center">
   <a href="#readme"><img alt="繁體中文" src="https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-eabf29?style=for-the-badge&labelColor=231815"></a>
   <a href="docs/README.en.md"><img alt="English" src="https://img.shields.io/badge/English-259fc8?style=for-the-badge&labelColor=231815"></a>
-</p>
+</div>
 
-<p align="center">
+<div align="center">
   <img src="docs/assets/hero.svg" alt="AIPARC ETA" width="760">
-</p>
+</div>
 
 <h1 align="center">AIPARC ETA</h1>
 
-<p align="center">
+<div align="center">
   <strong>實驗室伙食系統</strong><br>
   Discord 建檔、揪團、點餐、結算；校內網站只負責查閱。<br>
   金額由程式依庫內價格計算，模型不得自行定價。
-</p>
+</div>
 
-<p align="center">
+<div align="center">
   <img alt="release" src="https://img.shields.io/badge/release-0.2.0-eabf29?style=flat-square&labelColor=231815">
   <img alt="unreleased" src="https://img.shields.io/badge/unreleased-revise-259fc8?style=flat-square&labelColor=231815">
   <img alt="node" src="https://img.shields.io/badge/node-%E2%89%A524.12-339933?style=flat-square&logo=nodedotjs&logoColor=white">
@@ -23,9 +23,9 @@
   <img alt="discord.js" src="https://img.shields.io/badge/discord.js-14.27-5865F2?style=flat-square&logo=discord&logoColor=white">
   <img alt="locale" src="https://img.shields.io/badge/locale-zh--Hant%20%2F%20en--GB-eabf29?style=flat-square&labelColor=231815">
   <img alt="licence" src="https://img.shields.io/badge/licence-private-6b6b6b?style=flat-square">
-</p>
+</div>
 
-<p align="center">
+<div align="center">
   <a href="#功能">功能</a> ·
   <a href="#示範">示範</a> ·
   <a href="#架構">架構</a> ·
@@ -35,7 +35,7 @@
   <a href="DEPLOY.md">校內部屬</a> ·
   <a href="docs/README.md">文件索引</a> ·
   <a href="docs/presentations/README.md">介紹簡報</a>
-</p>
+</div>
 
 ---
 
@@ -88,15 +88,15 @@ AIPARC ETA 把餐廳菜單、論壇揪團與帳本收進同一套系統：寫入
 
 網站畫面為 2026-09-18 本機實拍（儀表板、品牌標誌、導覽列）。Discord 為依現行字串表與品牌色繪製的示意。
 
-<p align="center">
+<div align="center">
   <img src="docs/assets/demo-discord.png" alt="Discord 揪團彙總示意：全體清單、每人應付、數量與品項下拉、點餐按鈕" width="720">
-</p>
-<p align="center"><sub>論壇貼文裡的彙總 Embed（金色邊條）。點餐面板可選數量 1–10；也可以打「取消豆漿」。等待 LLM 時會有 Ack Reaction（👀）與 Streaming Preview。</sub></p>
+</div>
+<div align="center"><sub>論壇貼文裡的彙總 Embed（金色邊條）。點餐面板可選數量 1–10；也可以打「取消豆漿」。等待 LLM 時會有 Ack Reaction（👀）與 Streaming Preview。</sub></div>
 
-<p align="center">
+<div align="center">
   <img src="docs/assets/demo-web.png" alt="校內網站儀表板：數字卡、最近揪團與餐廳" width="720">
-</p>
-<p align="center"><sub>校內瀏覽器開 <code>http://&lt;伺服器內網IP&gt;:3000/</code>。樣式內嵌；深淺色切換存在本機，系統設為減少動態時不做動畫。</sub></p>
+</div>
+<div align="center"><sub>校內瀏覽器開 <code>http://&lt;伺服器內網IP&gt;:3000/</code>。樣式內嵌；深淺色切換存在本機，系統設為減少動態時不做動畫。</sub></div>
 
 ### 一條完整路徑
 
@@ -350,6 +350,6 @@ AIPARC-ETA/
 
 ---
 
-<p align="center">
+<div align="center">
   <sub>AIPARC ETA　·　實驗室伙食系統　·　台北時間</sub>
-</p>
+</div>
