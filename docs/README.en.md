@@ -1,21 +1,21 @@
-<p align="center">
+<div align="center">
   <a href="../README.md"><img alt="繁體中文" src="https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-259fc8?style=for-the-badge&labelColor=231815"></a>
   <a href="#readme"><img alt="English" src="https://img.shields.io/badge/English-eabf29?style=for-the-badge&labelColor=231815"></a>
-</p>
+</div>
 
-<p align="center">
+<div align="center">
   <img src="assets/hero.svg" alt="AIPAR ETA" width="760">
-</p>
+</div>
 
 <h1 align="center">AIPAR ETA</h1>
 
-<p align="center">
+<div align="center">
   <strong>Laboratory meals system</strong><br>
   Catalogue menus, open group orders, and settle the ledger on Discord.<br>
   The campus website is read-only. Prices always come from the database — never from the model.
-</p>
+</div>
 
-<p align="center">
+<div align="center">
   <img alt="release" src="https://img.shields.io/badge/release-0.2.0-eabf29?style=flat-square&labelColor=231815">
   <img alt="unreleased" src="https://img.shields.io/badge/unreleased-revise-259fc8?style=flat-square&labelColor=231815">
   <img alt="node" src="https://img.shields.io/badge/node-%E2%89%A524.12-339933?style=flat-square&logo=nodedotjs&logoColor=white">
@@ -23,9 +23,9 @@
   <img alt="discord.js" src="https://img.shields.io/badge/discord.js-14.27-5865F2?style=flat-square&logo=discord&logoColor=white">
   <img alt="locale" src="https://img.shields.io/badge/locale-zh--Hant%20%2F%20en--GB-eabf29?style=flat-square&labelColor=231815">
   <img alt="licence" src="https://img.shields.io/badge/licence-private-6b6b6b?style=flat-square">
-</p>
+</div>
 
-<p align="center">
+<div align="center">
   <a href="#features">Features</a> ·
   <a href="#demo">Demo</a> ·
   <a href="#architecture">Architecture</a> ·
@@ -35,7 +35,7 @@
   <a href="../DEPLOY.md">Campus deploy</a> ·
   <a href="./README.md">Docs index</a> ·
   <a href="./presentations/README.md">Talk deck</a>
-</p>
+</div>
 
 ---
 
@@ -89,15 +89,15 @@ English in this project is **English**. Discord users whose client language is C
 
 The website frame is a live capture from this machine on 2026-09-18 (dashboard, brand mark, navigation). The Discord frame is a live capture of a forum post on 2026-09-19.
 
-<p align="center">
+<div align="center">
   <img src="assets/demo-discord.png" alt="Discord group-order summary for Lao Yu Noodles: combined list, per-person totals, and order / lock / settle buttons" width="720">
-</p>
-<p align="center"><sub>Summary embed in the forum post (gold rule). After settlement it shows the closed time. The order panel picks a quantity from 1–10; typing “cancel the tea” takes a line off.</sub></p>
+</div>
+<div align="center"><sub>Summary embed in the forum post (gold rule). After settlement it shows the closed time. The order panel picks a quantity from 1–10; typing “cancel the tea” takes a line off.</sub></div>
 
-<p align="center">
+<div align="center">
   <img src="assets/demo-web.png" alt="Campus website dashboard with headline figures, recent group orders and restaurants" width="720">
-</p>
-<p align="center"><sub>On the campus network: <code>http://&lt;server-LAN-IP&gt;:3000/</code>. CSS is inlined. The theme toggle is stored locally; with reduce-motion set there is no animation.</sub></p>
+</div>
+<div align="center"><sub>On the campus network: <code>http://&lt;server-LAN-IP&gt;:3000/</code>. CSS is inlined. The theme toggle is stored locally; with reduce-motion set there is no animation.</sub></div>
 
 ### One complete path
 
@@ -350,6 +350,6 @@ In short: `snake_case` for variables and functions; maintainer comments in Tradi
 
 ---
 
-<p align="center">
+<div align="center">
   <sub>AIPAR ETA　·　laboratory meals　·　Asia/Taipei</sub>
-</p>
+</div>
