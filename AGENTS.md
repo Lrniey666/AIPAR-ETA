@@ -9,7 +9,7 @@
 
 ## 1. 這個專案是什麼
 
-**AIPAR ETA**（實驗室伙食系統）：實驗室內部用的 Discord bot＋校內網站＋PostgreSQL。規劃別名曾寫成「AIPARC EAT」；倉庫、Compose、套件名稱一律是 `aipar-eta`／AIPAR ETA。
+**AIPAR ETA**（實驗室伙食系統）：實驗室內部用的 Discord bot＋校內網站＋PostgreSQL。規劃別名曾寫成「AIPARC EAT」；Repository、Compose、套件名稱一律是 `aipar-eta`／AIPAR ETA。
 
 **現況**：`PLAN/plan_initial.md` 的三個功能在 0.2.0 全部落地——餐廳菜單建檔與查詢（含圖片辨識與人工輸入）、
 論壇貼文揪團點餐（按鈕／下拉與自然語言兩條路）、記帳與分攤結算；免費 LLM 閘道、schema 遷移、校內網站、離線測試都已就緒。
@@ -33,12 +33,12 @@
 | HTTP | `node:http` 自寫路由＋伺服器端渲染（刻意不引網頁框架） |
 | Discord | discord.js 14.27 |
 | LLM | 自寫閘道，OpenAI 相容 wire format＋內建 `fetch`，**不引任何 LLM SDK** |
-| OCR | 本倉 `ocr/` sidecar（PP-OCRv6 small ONNX）；Compose 預設接上，沒設 `OCR_BASE_URL` 才略過 |
+| OCR | 本 Repository `ocr/` sidecar（PP-OCRv6 small ONNX）；Compose 預設接上，沒設 `OCR_BASE_URL` 才略過 |
 | 測試 | `node:test`（`test/*.test.ts`），77 項離線測試 |
 
-這不是 Python 專案。根目錄 `requirements.txt` 依現況不列 pip 套件，**執行相依以 `package.json` 為準**。`.cursorrules` 仍寫「Python 用 snake_case」——**變數／函式在本倉 TypeScript 同樣用 snake_case**（見 `load_config`、`summarise_orders`），類別與型別用 PascalCase。
+這不是 Python 專案。根目錄 `requirements.txt` 依現況不列 pip 套件，**執行相依以 `package.json` 為準**。`.cursorrules` 仍寫「Python 用 snake_case」——**變數／函式在本 Repository TypeScript 同樣用 snake_case**（見 `load_config`、`summarise_orders`），類別與型別用 PascalCase。
 
-**與隔壁專案的界線**：`AIPAR-ordering-system` 名稱相近但**互不隸屬**。未經允許不要抄它的程式、套件切分、或架構。研究數據可看 `AIPAR-ordering-system-sesearch`（見 §6），那是實驗倉不是產品倉。
+**與隔壁專案的界線**：`AIPAR-ordering-system` 名稱相近但**互不隸屬**。未經允許不要抄它的程式、套件切分、或架構。研究數據可看 `AIPAR-ordering-system-sesearch`（見 §6），那是實驗倉不是產品 Repository。
 
 ---
 
@@ -205,7 +205,7 @@ shared ← db ← domain ← llm ← bot
 - 模型 ID 會下架、改名，且價目表 ≠ 打得到。有金鑰但沒填模型 ID 就跳過並記錄原因，**不要拿猜的 ID 去打**。採用前跑 `npm run llm:check` 查證。
 - 視覺（菜單圖）與文字模型分開設定；不支援視覺的供應商不會被排進視覺佇列。
 - **空回覆視為該家失敗**並換下一家（Gemini 免費層常把 token 花在思考上）。
-- 允許參考、優化、嵌入這些**研究倉**（不是抄產品倉）：
+- 允許參考、優化、嵌入這些**研究 Repository**（不是抄產品 Repository）：
   - `../AIPAR-ordering-system-sesearch/free-llm-api-test`
   - `../AIPAR-ordering-system-sesearch/ppocrv6-test-project`
 - 菜單範例：`PLAN/example/menu_example/`

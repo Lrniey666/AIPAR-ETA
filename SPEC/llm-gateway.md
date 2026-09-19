@@ -197,9 +197,9 @@ npm run route:check
 以及 PaddleOCR hubserving 的 `{"results":[[…]]}`。認不得的形狀回空陣列，
 安靜退回純視覺流程，不讓整支 `/菜單 上傳` 失敗。
 
-本倉的 OCR 服務在 `ocr/`：PP-OCRv6 small 的 ONNX 權重放 `ocr/models/`，
+本 Repository 的 OCR 服務在 `ocr/`：PP-OCRv6 small 的 ONNX 權重放 `ocr/models/`，
 HTTP 入口是 `POST /ocr`，Compose 服務名 `ocr`（映像 `aipar-eta:ocr`）。
-**不要跑在 bot 容器裡**，也不要在執行期去讀研究倉路徑。
+**不要跑在 bot 容器裡**，也不要在執行期去讀研究 Repository 路徑。
 權重遺失時在 `ocr/` 跑 `node scripts/fetch-models.ts`。
 
 ## 驗證

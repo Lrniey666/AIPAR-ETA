@@ -9,8 +9,8 @@ Compose 專案名稱：`aipar-eta`
 | 服務 | 映像／建置 | 對外埠 | 職責 |
 | --- | --- | --- | --- |
 | `postgres` | `postgres:18.6-alpine` | `127.0.0.1:5432` | 主資料庫。只綁本機，不對校園網開放。 |
-| `ocr` | `aipar-eta:ocr`（本倉 `ocr/Dockerfile`） | `127.0.0.1:8868` | 菜單對帳 OCR（PP-OCRv6 small ONNX）。權重在 `ocr/models/`。 |
-| `web` | `aipar-eta:app`（本倉 `Dockerfile`） | `${APP_PORT:-3000}` | 網站／API。校內裝置可連這一個埠。啟動 `src/web.ts`。 |
+| `ocr` | `aipar-eta:ocr`（本 Repository `ocr/Dockerfile`） | `127.0.0.1:8868` | 菜單對帳 OCR（PP-OCRv6 small ONNX）。權重在 `ocr/models/`。 |
+| `web` | `aipar-eta:app`（本 Repository `Dockerfile`） | `${APP_PORT:-3000}` | 網站／API。校內裝置可連這一個埠。啟動 `src/web.ts`。 |
 | `bot` | 同上；啟動 `src/bot.ts` | 無對外埠 | Discord bot。只對內做健康檢查。 |
 
 `web` 與 `bot` 必須寫同一個 `image:`（`aipar-eta:app`）。Compose 沒指定名稱時會依服務編成 `aipar-eta-web`／`aipar-eta-bot` 兩筆，內容幾乎相同、映像 ID 不同。`pull_policy: build` 避免誤去 Docker Hub 拉同名公開映像。
@@ -59,9 +59,9 @@ Compose 專案名稱：`aipar-eta`
 | `OCR_PATH` / `OCR_API_KEY` / `OCR_MODEL` | | 端點路徑（預設 `/ocr`）、金鑰、模型名稱 |
 | `OCR_TIMEOUT_MS` / `OCR_MIN_SCORE` | | 逾時（程式預設 20000，Compose 覆寫 60000）與信心門檻（預設 0.6） |
 
-**OCR 不要跑在 `bot` 容器裡**，但本倉已提供獨立的 `ocr` 服務（`ocr/`，權重在 `ocr/models/`）。
+**OCR 不要跑在 `bot` 容器裡**，但本 Repository 已提供獨立的 `ocr` 服務（`ocr/`，權重在 `ocr/models/`）。
 `docker compose up` 會一起啟動。線上格式見 `SPEC/llm-gateway.md` §菜單 OCR 對帳。
-權重遺失時在 `ocr/` 執行 `node scripts/fetch-models.ts`（用 RapidOCR 的 PyPI 套件抽出 ONNX，不讀研究倉路徑）。
+權重遺失時在 `ocr/` 執行 `node scripts/fetch-models.ts`（用 RapidOCR 的 PyPI 套件抽出 ONNX，不讀研究 Repository 路徑）。
 
 ## 驗證
 

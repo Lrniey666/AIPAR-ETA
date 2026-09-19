@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- 本倉 OCR sidecar（PP-OCRv6 small ONNX）：`ocr/` 獨立映像 `aipar-eta:ocr`，權重在 `ocr/models/`，Compose 與 bot、web、postgres 一起啟動。bot 的 `OCR_BASE_URL` 覆寫成 `http://ocr:8868`，執行期不讀研究倉路徑。確認：`docker compose up --build -d` 後四個服務 `healthy`；`GET http://127.0.0.1:8868/health` 回 `ok: true`；bot 啟動日誌不再寫「未設定 OCR_BASE_URL」。
+- 本 Repository OCR sidecar（PP-OCRv6 small ONNX）：`ocr/` 獨立映像 `aipar-eta:ocr`，權重在 `ocr/models/`，Compose 與 bot、web、postgres 一起啟動。bot 的 `OCR_BASE_URL` 覆寫成 `http://ocr:8868`，執行期不讀研究 Repository 路徑。確認：`docker compose up --build -d` 後四個服務 `healthy`；`GET http://127.0.0.1:8868/health` 回 `ok: true`；bot 啟動日誌不再寫「未設定 OCR_BASE_URL」。
 - 自然語言取消點餐：「取消紅茶」「全部取消」；講不清楚要取消哪一項時反問，不讓模型猜要刪什麼。規則在 `src/llm/tasks/order_cancel.ts`，意圖多一種 `cancel-order`。
 - 自然語言查帳：@ bot 問「我還欠多少」「誰欠我錢」會用帳務 Embed 回覆，金額一律取自資料庫。
 - 帳務記錄「誰欠誰」：`ledger_entries.counterparty_user_id` 與 `order_sessions.payer_user_id`（遷移 `003_debts_and_roles.sql`）。新增 `/帳務 誰欠誰` 顯示互抵後的欠款與最少轉帳建議；`/帳務 我的` 多一欄「你要拿 X 給某某」；`/帳務 付款` 可指定「付給」誰。收斂邏輯在 `src/domain/debts.ts`。
@@ -39,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 自然語言問答的系統提示重寫：明列「文字回覆不得出現菜名或價格」「標示尚無菜單的店要照實說不知道」「不確定就說不知道」，並把最近對話當成真正的 chat messages 傳入。
 - `search_restaurants()` 的相關說明更新；餐廳查詢新增 `list_restaurants_with_menu()`，一次帶回菜單狀態，呼叫端不必逐間補查。
 - 網站改版：導覽列、儀表板、深淺色切換（View Transitions 的圓形遮罩轉場，從按鈕為圓心擴散）、響應式版面（手機到曲面寬螢幕）、Smooth Rounded Corners。`prefers-reduced-motion` 時**完全關閉**轉場與動畫直接切換。配色與 Embed 共用標誌的金與藍。
-- 對外 README 對齊現況：77 項離線測試、本倉 `ocr/` sidecar 與 `aipar-eta:app` 共用映像、`/記憶`、`npm run route:check`、防幻覺與對話記憶；Hero／儀表板實拍維持金藍品牌。
+- 對外 README 對齊現況：77 項離線測試、本 Repository `ocr/` sidecar 與 `aipar-eta:app` 共用映像、`/記憶`、`npm run route:check`、防幻覺與對話記憶；Hero／儀表板實拍維持金藍品牌。
 - 對外 README 的 Discord 示範圖改為 2026-09-19 論壇貼文實拍（已結算的彙總 Embed 與點餐面板），取代先前依字串表繪製的示意。確認：`README.md` 與 `docs/README.en.md` 皆指向 `docs/assets/demo-discord.png`。
 - 映像多 `COPY logo ./logo`，網站的 `/assets/` 與 Embed 縮圖從那裡讀。
 - `CHANGELOG.md` 改為 [Keep a Changelog 2.0.0](https://keepachangelog.com/en/2.0.0/)：版本標題用 `## [x.y.z] - YYYY-MM-DD`、僅使用六種變更類型，並在檔尾加上版本比對連結。既有 0.1.0–0.2.1 的事實未改，只重寫結構與用詞。
@@ -103,7 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - 2026-09-18
 
-規劃中的專案還沒有版本控制與可重現執行環境。本版建立 Git 倉庫與 Docker Compose，讓網站、Discord bot、PostgreSQL 能在同一套容器上開發與部署。`GET /health` 回 `ok: true` 且含資料庫時間；`.env` 不被追蹤。
+規劃中的專案還沒有版本控制與可重現執行環境。本版建立 Git Repository 與 Docker Compose，讓網站、Discord bot、PostgreSQL 能在同一套容器上開發與部署。`GET /health` 回 `ok: true` 且含資料庫時間；`.env` 不被追蹤。
 
 ### Added
 

@@ -1,5 +1,5 @@
-# 從 RapidOCR 的 PyPI 套件抽出 PP-OCRv6 small ONNX（不依賴研究倉路徑）。
-# 本倉 `ocr/models/` 已帶權重；只有權重遺失或要更新時才跑這個腳本。
+# 從 RapidOCR 的 PyPI 套件抽出 PP-OCRv6 small ONNX（不依賴研究 Repository 路徑）。
+# 本 Repository `ocr/models/` 已帶權重；只有權重遺失或要更新時才跑這個腳本。
 
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";

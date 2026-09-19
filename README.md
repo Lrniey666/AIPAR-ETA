@@ -40,9 +40,9 @@
 ---
 
 實驗室中午要點什麼、誰點了什麼、最後誰該付多少——這件事不該再散落在十則訊息裡。
-AIPAR ETA 把餐廳菜單、論壇揪團與帳本收進同一套系統：寫入走 Discord bot，查閱走校內網站，資料放 PostgreSQL。自然語言與菜單辨識只用**免費 LLM API**。菜單對帳 OCR（PP-OCRv6 small）是本倉 `ocr/` sidecar，Compose 會一起啟動；沒設 `OCR_BASE_URL`（且不走 Compose）才略過。沒有金鑰時按鈕與下拉仍可點餐。
+AIPAR ETA 把餐廳菜單、論壇揪團與帳本收進同一套系統：寫入走 Discord bot，查閱走校內網站，資料放 PostgreSQL。自然語言與菜單辨識只用**免費 LLM API**。菜單對帳 OCR（PP-OCRv6 small）是本 Repository `ocr/` sidecar，Compose 會一起啟動；沒設 `OCR_BASE_URL`（且不走 Compose）才略過。沒有金鑰時按鈕與下拉仍可點餐。
 
-> **現況（0.2.0 ＋ Unreleased）**　三個產品功能已落地；這一輪再依 `PLAN/AEPARC_EAT_Revise_1.md` 補上直書菜單對帳（本倉 OCR 容器）、自然語言取消／查帳／推薦、誰欠誰、對話記憶、防幻覺，以及網站儀表板與深淺色。
+> **現況（0.2.0 ＋ Unreleased）**　三個產品功能已落地；這一輪再依 `PLAN/AEPARC_EAT_Revise_1.md` 補上直書菜單對帳（本 Repository OCR 容器）、自然語言取消／查帳／推薦、誰欠誰、對話記憶、防幻覺，以及網站儀表板與深淺色。
 > 離線測試 **77** 項、`npm run smoke`、`npm run route:check` 與本機網站頁面已通過。**Discord 端的真人操作尚未驗收**（含 `/記憶`）；指令表有增減，部署後請跑 `npm run register`。
 
 ## 功能
@@ -75,7 +75,7 @@ AIPAR ETA 把餐廳菜單、論壇揪團與帳本收進同一套系統：寫入�
 
 | 還有這些 | 為什麼這樣做 |
 | --- | --- |
-| **直書菜單也讀得出來** | 本倉 `ocr/`（PP-OCRv6 small ONNX）先算出版面方向與閱讀順序，再交給視覺模型，最後回頭對帳標出沒核對上的行。權重在 `ocr/models/`。 |
+| **直書菜單也讀得出來** | 本 Repository `ocr/`（PP-OCRv6 small ONNX）先算出版面方向與閱讀順序，再交給視覺模型，最後回頭對帳標出沒核對上的行。權重在 `ocr/models/`。 |
 | **不會編菜單給你** | 判準是「資料庫答得了嗎」：答得了就用資料庫回（菜單、品項、推薦都來自 `menu_items`），答不了才交給模型，而且回完還要過一次守門。 |
 | **記得住** | 短期記得這個頻道最近的對話，長期記得你明講要它記的事（`/記憶`），也認得出伺服器、頻道與是誰在問。 |
 | **校內網站唯讀** | 沒有公有網域；寫入只留一條授權路徑（Discord）。 |
@@ -149,7 +149,7 @@ flowchart LR
   L -.-> B
 ```
 
-兩個入口共用資料庫，**都不直接寫 SQL**：`bot` 與 `web` 只呼叫 `db/` 與 `domain/`。LLM 閘道走 OpenAI 相容 wire format，換一家只換 `base_url`、金鑰、模型 ID，不引任何 LLM SDK。OCR 是本倉 `ocr/` 的獨立容器（映像 `aipar-eta:ocr`），**不要跑在 bot 行程裡**；`web` 與 `bot` 共用映像 `aipar-eta:app`。
+兩個入口共用資料庫，**都不直接寫 SQL**：`bot` 與 `web` 只呼叫 `db/` 與 `domain/`。LLM 閘道走 OpenAI 相容 wire format，換一家只換 `base_url`、金鑰、模型 ID，不引任何 LLM SDK。OCR 是本 Repository `ocr/` 的獨立容器（映像 `aipar-eta:ocr`），**不要跑在 bot 行程裡**；`web` 與 `bot` 共用映像 `aipar-eta:app`。
 
 | 層 | 目錄 | 可以依賴 |
 | --- | --- | --- |
@@ -319,7 +319,7 @@ AIPAR-ETA/
 
 - **空回覆或要 JSON 卻挖不出來**視為該家失敗並換下一家（Gemini 免費層常把 token 花在思考上，或回一段無法解析的字）。
 - 429／5xx 同一把重試一次再換手；401／403 立刻換下一把。
-- 菜單圖片辨識與文字模型分開排隊。Compose 會先打本倉 `ocr/` 的 PP-OCRv6 small 對帳；只標記不改草稿。`menu-vision`／`menu-text` 開 `require_json`。
+- 菜單圖片辨識與文字模型分開排隊。Compose 會先打本 Repository `ocr/` 的 PP-OCRv6 small 對帳；只標記不改草稿。`menu-vision`／`menu-text` 開 `require_json`。
 
 紅線：價格永遠查 `menu_items`；規則對得到就不呼叫模型。細節見 [`SPEC/llm-gateway.md`](SPEC/llm-gateway.md)。採用前請跑 `npm run llm:check`，價目表上有的模型不一定打得到。
 
@@ -345,7 +345,7 @@ AIPAR-ETA/
 
 ## 授權
 
-本倉庫 `package.json` 標為 `"private": true`，**尚未指定公開授權條款**。供實驗室內部使用；未經同意請勿散布原始碼、映像或金鑰。
+本 Repository `package.json` 標為 `"private": true`，**尚未指定公開授權條款**。供實驗室內部使用；未經同意請勿散布原始碼、映像或金鑰。
 
 ---
 

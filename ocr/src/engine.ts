@@ -1,5 +1,5 @@
 // PP-OCRv6 small（ONNX）推論。權重在 `ocr/models/`，執行期不讀專案外路徑。
-// 偵測後處理是簡化版連通區域＋軸對齊外框（與研究倉實驗同一套），沒有大角度旋轉框。
+// 偵測後處理是簡化版連通區域＋軸對齊外框（與研究 Repository 實驗同一套），沒有大角度旋轉框。
 
 import { existsSync } from "node:fs";
 import path from "node:path";
