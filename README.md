@@ -1,6 +1,6 @@
 <p align="center">
   <a href="#readme"><img alt="繁體中文" src="https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-eabf29?style=for-the-badge&labelColor=231815"></a>
-  <a href="docs/README.en-GB.md"><img alt="English (UK)" src="https://img.shields.io/badge/English_(UK)-259fc8?style=for-the-badge&labelColor=231815"></a>
+  <a href="docs/README.en.md"><img alt="English" src="https://img.shields.io/badge/English-259fc8?style=for-the-badge&labelColor=231815"></a>
 </p>
 
 <p align="center">
@@ -86,12 +86,12 @@ AIPAR ETA 把餐廳菜單、論壇揪團與帳本收進同一套系統：寫入�
 
 ## 示範
 
-網站畫面為 2026-09-18 本機實拍（儀表板、品牌標誌、導覽列）。Discord 為依現行字串表與品牌色繪製的示意。
+網站畫面為 2026-09-18 本機實拍（儀表板、品牌標誌、導覽列）。Discord 為 2026-09-19 論壇貼文實拍。
 
 <p align="center">
-  <img src="docs/assets/demo-discord.png" alt="Discord 揪團彙總示意：全體清單、每人應付、數量與品項下拉、點餐按鈕" width="720">
+  <img src="docs/assets/demo-discord.png" alt="Discord 揪團彙總：老余麵店全體清單、每人應付、點餐／封單／結算按鈕" width="720">
 </p>
-<p align="center"><sub>論壇貼文裡的彙總 Embed（金色邊條）。點餐面板可選數量 1–10；也可以打「取消豆漿」。等待 LLM 時會有 Ack Reaction（👀）與 Streaming Preview。</sub></p>
+<p align="center"><sub>論壇貼文裡的彙總 Embed（金色邊條）。已結算後顯示截止時刻；點餐面板可選數量 1–10，也可以打「取消紅茶」。</sub></p>
 
 <p align="center">
   <img src="docs/assets/demo-web.png" alt="校內網站儀表板：數字卡、最近揪團與餐廳" width="720">
@@ -339,7 +339,7 @@ AIPAR-ETA/
 
 ## 貢獻
 
-實驗室內部專案。改程式前請讀 [`CONTRIBUTING.md`](CONTRIBUTING.md)（[English (UK)](docs/CONTRIBUTING.en-GB.md)）與 [`.cursorrules`](.cursorrules)。
+實驗室內部專案。改程式前請讀 [`CONTRIBUTING.md`](CONTRIBUTING.md)（[English](docs/CONTRIBUTING.en.md)）與 [`.cursorrules`](.cursorrules)。
 
 簡要約定：變數／函式 `snake_case`；註解與維護者錯誤訊息用繁體中文；動到契約要同步 `SPEC/`；每次變更更新 `CHANGELOG.md` 的 `Unreleased`（Keep a Changelog 2.0.0；發版才給新版號）；`npm run check` 要全綠。不要抄隔壁 `AIPAR-ordering-system` 的程式或架構。
 

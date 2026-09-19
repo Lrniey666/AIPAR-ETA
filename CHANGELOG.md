@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `search_restaurants()` 的相關說明更新；餐廳查詢新增 `list_restaurants_with_menu()`，一次帶回菜單狀態，呼叫端不必逐間補查。
 - 網站改版：導覽列、儀表板、深淺色切換（View Transitions 的圓形遮罩轉場，從按鈕為圓心擴散）、響應式版面（手機到曲面寬螢幕）、Smooth Rounded Corners。`prefers-reduced-motion` 時**完全關閉**轉場與動畫直接切換。配色與 Embed 共用標誌的金與藍。
 - 對外 README 對齊現況：77 項離線測試、本倉 `ocr/` sidecar 與 `aipar-eta:app` 共用映像、`/記憶`、`npm run route:check`、防幻覺與對話記憶；Hero／儀表板實拍維持金藍品牌。
+- 對外 README 的 Discord 示範圖改為 2026-09-19 論壇貼文實拍（已結算的彙總 Embed 與點餐面板），取代先前依字串表繪製的示意。確認：`README.md` 與 `docs/README.en.md` 皆指向 `docs/assets/demo-discord.png`。
 - 映像多 `COPY logo ./logo`，網站的 `/assets/` 與 Embed 縮圖從那裡讀。
 - `CHANGELOG.md` 改為 [Keep a Changelog 2.0.0](https://keepachangelog.com/en/2.0.0/)：版本標題用 `## [x.y.z] - YYYY-MM-DD`、僅使用六種變更類型，並在檔尾加上版本比對連結。既有 0.1.0–0.2.1 的事實未改，只重寫結構與用詞。
 - 維護約定（`.cursorrules`、`AGENTS.md`、`CONTRIBUTING.md`）改為把未發布變更寫進 `Unreleased`；發版時再改成帶日期的版本號。變更目的寫在該版本摘要或各條目用詞裡，不再另開「變更目的／影響範圍／驗收」標題。
@@ -68,13 +69,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.1] - 2026-09-18
 
-0.2.0 的根目錄 `README.md` 只夠本機啟動。本版把對外說明改成繁中／英式英文兩份對照，安裝與契約細節收到可折疊區塊與既有 `SPEC/`、`DEPLOY.md`。未改應用程式行為、路由或資料契約。
+0.2.0 的根目錄 `README.md` 只夠本機啟動。本版把對外說明改成繁中／英文兩份對照，安裝與契約細節收到可折疊區塊與既有 `SPEC/`、`DEPLOY.md`。未改應用程式行為、路由或資料契約。
 
 ### Added
 
 - 繁體中文專案介紹 `README.md`：Hero、徽章、語言切換、功能、示範、架構、安裝、結構、貢獻與授權。
-- 同一份內容的英式英文 `docs/README.en-GB.md`。
-- 貢獻指南 `CONTRIBUTING.md` 與 `docs/CONTRIBUTING.en-GB.md`，以及說明文件索引 `docs/README.md`。
+- 同一份內容的英文 `docs/README.en.md`。
+- 貢獻指南 `CONTRIBUTING.md` 與 `docs/CONTRIBUTING.en.md`，以及說明文件索引 `docs/README.md`。
 - `docs/assets/`：標誌 SVG，以及 Discord／網站示意 PNG。
 
 ### Changed

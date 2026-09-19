@@ -1,6 +1,6 @@
 # 貢獻指南
 
-語言：[繁體中文](CONTRIBUTING.md) · [English (UK)](docs/CONTRIBUTING.en-GB.md)
+語言：[繁體中文](CONTRIBUTING.md) · [English](docs/CONTRIBUTING.en.md)
 
 這是實驗室內部的伙食系統。歡迎修 bug、補測試、改文件；請先對齊現況再動手。
 

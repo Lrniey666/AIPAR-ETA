@@ -1,6 +1,6 @@
 # Contributing
 
-Languages: [繁體中文](../CONTRIBUTING.md) · [English (UK)](CONTRIBUTING.en-GB.md)
+Languages: [繁體中文](../CONTRIBUTING.md) · [English](CONTRIBUTING.en.md)
 
 This is an internal laboratory meals system. Bug fixes, tests, and documentation are welcome — please match the current tree before you start.
 
@@ -25,7 +25,7 @@ When they disagree, **code wins**, then SPEC is updated to match. Product intent
 | File size | split near 300 lines; hard limit 500 |
 | Text files | LF (see `.gitattributes`) |
 
-User-visible copy lives in `src/bot/strings.ts`: **Traditional Chinese and British English together**. Missing one side fails the type check.
+User-visible copy lives in `src/bot/strings.ts`: **Traditional Chinese and English together**. Missing one side fails the type check.
 
 ## Please do not
 
@@ -46,4 +46,4 @@ Ask first for irreversible work (dropping volumes, `compose down -v`, push, glob
 5. LLM settings → `npm run llm:check` (needs keys)
 6. Slash-command definitions → `npm run register`
 
-The public-facing introduction is [`README.md`](../README.md) / [`README.en-GB.md`](README.en-GB.md). Campus hosting is [`DEPLOY.md`](../DEPLOY.md).
+The public-facing introduction is [`README.md`](../README.md) / [`README.en.md`](README.en.md). Campus hosting is [`DEPLOY.md`](../DEPLOY.md).

@@ -1,6 +1,6 @@
 <p align="center">
   <a href="../README.md"><img alt="繁體中文" src="https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-259fc8?style=for-the-badge&labelColor=231815"></a>
-  <a href="#readme"><img alt="English (UK)" src="https://img.shields.io/badge/English_(UK)-eabf29?style=for-the-badge&labelColor=231815"></a>
+  <a href="#readme"><img alt="English" src="https://img.shields.io/badge/English-eabf29?style=for-the-badge&labelColor=231815"></a>
 </p>
 
 <p align="center">
@@ -44,7 +44,7 @@ Lunch orders should not live across ten Discord messages. AIPAR ETA keeps restau
 > **Status (0.2.0 + Unreleased).** The three product features shipped in 0.2.0. This round follows `PLAN/AEPARC_EAT_Revise_1.md`: in-repo OCR, plain-language cancel / ledger / recommend, who-owes-whom, conversation memory, anti-hallucination, and a themed dashboard.
 > **77** offline tests, `npm run smoke`, `npm run route:check` and the local website pages have passed. **Live Discord use has not been signed off** (including `/memory`). The command table changed — run `npm run register` after deploy.
 
-English in this project is **British English**. Discord users whose client language is Chinese (Traditional or Simplified) see Traditional Chinese; everyone else sees English.
+English in this project is **English**. Discord users whose client language is Chinese (Traditional or Simplified) see Traditional Chinese; everyone else sees English.
 
 ## Features
 
@@ -87,12 +87,12 @@ English in this project is **British English**. Discord users whose client langu
 
 ## Demo
 
-The website frame is a live capture from this machine on 2026-09-18 (dashboard, brand mark, navigation). The Discord frame is an illustration that follows the current string table and brand colours.
+The website frame is a live capture from this machine on 2026-09-18 (dashboard, brand mark, navigation). The Discord frame is a live capture of a forum post on 2026-09-19.
 
 <p align="center">
-  <img src="assets/demo-discord.png" alt="Illustrated Discord summary embed with combined order, per-person totals, quantity dropdown and action buttons" width="720">
+  <img src="assets/demo-discord.png" alt="Discord group-order summary for Lao Yu Noodles: combined list, per-person totals, and order / lock / settle buttons" width="720">
 </p>
-<p align="center"><sub>Summary embed in the forum post (gold rule). The order panel picks a quantity from 1–10. Typing “cancel the soya milk” takes a line off. An Ack reaction (👀) and a streaming preview appear while the bot waits on an LLM.</sub></p>
+<p align="center"><sub>Summary embed in the forum post (gold rule). After settlement it shows the closed time. The order panel picks a quantity from 1–10; typing “cancel the tea” takes a line off.</sub></p>
 
 <p align="center">
   <img src="assets/demo-web.png" alt="Campus website dashboard with headline figures, recent group orders and restaurants" width="720">
@@ -340,7 +340,7 @@ Hard rules: unit prices always come from `menu_items`; a matching rule means the
 
 ## Contributing
 
-This is an internal laboratory project. Please read [`CONTRIBUTING.md`](../CONTRIBUTING.md) ([English (UK)](CONTRIBUTING.en-GB.md)) and [`.cursorrules`](../.cursorrules) before editing.
+This is an internal laboratory project. Please read [`CONTRIBUTING.md`](../CONTRIBUTING.md) ([English](CONTRIBUTING.en.md)) and [`.cursorrules`](../.cursorrules) before editing.
 
 In short: `snake_case` for variables and functions; maintainer comments in Traditional Chinese; keep `SPEC/` in sync when contracts change; record notable changes under `CHANGELOG.md` `Unreleased` (Keep a Changelog 2.0.0); `npm run check` must stay green. Do not copy code or architecture from the neighbouring `AIPAR-ordering-system` repository.
 
