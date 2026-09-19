@@ -423,7 +423,7 @@
 
 - **白話**：英文介面用英國拼法，例如 cancelled，不是美式 canceled。
 - **概念**：非中文介面的用字。
-- **定義**：cancelled、colour 等 UK 拼法；文件在 `docs/README.en-GB.md`。
+- **定義**：cancelled、colour 等 UK 拼法；文件在 `docs/README.en.md`。
 - **本專案用途**：指令預設 description、Embed 英文側、按鈕英文標籤。
 
 ---

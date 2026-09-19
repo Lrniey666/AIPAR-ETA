@@ -64,7 +64,7 @@
 | 契約／拓樸 | `SPEC/`（五份：infrastructure、data-model、bot-interactions、llm-gateway、web-api） |
 | 產品意圖／未落地需求 | `PLAN/plan_initial.md`、`PLAN/AEPARC_EAT_Revise_1.md` |
 | 版本歷史 | `CHANGELOG.md` |
-| 怎麼跑／怎麼部署 | `README.md`（繁中介紹＋安裝）、`docs/README.en-GB.md`、`DEPLOY.md` |
+| 怎麼跑／怎麼部署 | `README.md`（繁中介紹＋安裝）、`docs/README.en.md`、`DEPLOY.md` |
 | 撰碼硬性慣例 | `.cursorrules` |
 
 衝突時：**程式碼 > SPEC > PLAN**。以程式碼為準時，必須回頭修正 SPEC。
@@ -115,8 +115,8 @@
 | 網站頁面／API | `web-api.md` | `src/web/server.ts`、`routes/`、`render.ts`、`theme.ts`、`assets.ts` | 路由比對在 `routes/match.ts`，是純函式且有測試 |
 | 網站外觀／主題切換 | `web-api.md` | `src/web/theme.ts` | `prefers-reduced-motion` 要完全關掉動畫，不是縮短 |
 | Docker／映像 | `infrastructure.md` | `Dockerfile`、`ocr/Dockerfile`、`compose.yaml` | 非 root `node`；時區 `Asia/Taipei`；OCR 用獨立映像，勿塞進 bot |
-| 本機／校內部署說明 | — | `README.md`、`docs/README.en-GB.md`、`DEPLOY.md` | postgres 埠只綁 `127.0.0.1` |
-| 專案介紹文案 | — | `README.md`、`docs/README.en-GB.md`、`docs/assets/` | 繁中與英式英文對照；示意圖改完兩份 README 都要看 |
+| 本機／校內部署說明 | — | `README.md`、`docs/README.en.md`、`DEPLOY.md` | postgres 埠只綁 `127.0.0.1` |
+| 專案介紹文案 | — | `README.md`、`docs/README.en.md`、`docs/assets/` | 繁中與英文對照；示意圖改完兩份 README 都要看 |
 
 分層與依賴方向（勿反向依賴）：
 
@@ -154,7 +154,7 @@ shared ← db ← domain ← llm ← bot
 | `PLAN/example/menu_example/` | 菜單圖片範例 | 做辨識時 |
 | `test/` | 離線測試，同時也是行為說明書 | 改邏輯前後 |
 | `README.md` | 繁中專案介紹、示範、本機啟動 | 第一次接觸 |
-| `docs/README.en-GB.md` | 英式英文介紹 | 英文讀者 |
+| `docs/README.en.md` | 英文介紹 | 英文讀者 |
 | `docs/README.md` | 說明文件索引 | 不知道該開哪一份時 |
 | `docs/presentations/` | 通用介紹簡報、講稿與技術專有名詞 | 口頭介紹專案時 |
 | `CONTRIBUTING.md` | 貢獻約定 | 要改程式或文件時 |

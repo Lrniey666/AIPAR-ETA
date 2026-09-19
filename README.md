@@ -1,6 +1,6 @@
 <p align="center">
   <a href="#readme"><img alt="繁體中文" src="https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-eabf29?style=for-the-badge&labelColor=231815"></a>
-  <a href="docs/README.en-GB.md"><img alt="English (UK)" src="https://img.shields.io/badge/English_(UK)-259fc8?style=for-the-badge&labelColor=231815"></a>
+  <a href="docs/README.en.md"><img alt="English" src="https://img.shields.io/badge/English-259fc8?style=for-the-badge&labelColor=231815"></a>
 </p>
 
 <p align="center">
@@ -340,7 +340,7 @@ AIPARC-ETA/
 
 ## 貢獻
 
-實驗室內部專案。改程式前請讀 [`CONTRIBUTING.md`](CONTRIBUTING.md)（[English (UK)](docs/CONTRIBUTING.en-GB.md)）與 [`.cursorrules`](.cursorrules)。
+實驗室內部專案。改程式前請讀 [`CONTRIBUTING.md`](CONTRIBUTING.md)（[English](docs/CONTRIBUTING.en.md)）與 [`.cursorrules`](.cursorrules)。
 
 簡要約定：變數／函式 `snake_case`；註解與維護者錯誤訊息用繁體中文；動到契約要同步 `SPEC/`；每次變更更新 `CHANGELOG.md` 的 `Unreleased`（Keep a Changelog 2.0.0；發版才給新版號）；`npm run check` 要全綠。不要抄隔壁 `AIPAR-ordering-system` 的程式或架構。
 

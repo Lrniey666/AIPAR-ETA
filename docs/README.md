@@ -5,9 +5,9 @@
 | 檔案 | 語言 | 內容 |
 | --- | --- | --- |
 | [../README.md](../README.md) | 繁體中文 | 專案介紹、功能、示範、架構、安裝、結構 |
-| [README.en-GB.md](./README.en-GB.md) | English (UK) | 同上的英式英文對照 |
+| [README.en.md](./README.en.md) | English | 同上的英文對照 |
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | 繁體中文 | 怎麼改這個倉庫 |
-| [CONTRIBUTING.en-GB.md](./CONTRIBUTING.en-GB.md) | English (UK) | Contributing |
+| [CONTRIBUTING.en.md](./CONTRIBUTING.en.md) | English | Contributing |
 | [presentations/](./presentations/README.md) | 繁體中文 | 通用介紹簡報、講稿與技術專有名詞 |
 | [../DEPLOY.md](../DEPLOY.md) | 繁體中文 | 校內 24/7 伺服器、備份、連跑一週 |
 | [../SPEC/README.md](../SPEC/README.md) | 繁體中文 | 架構與資料契約索引 |

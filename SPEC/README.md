@@ -1,7 +1,7 @@
 # SPEC
 
 本目錄記錄實驗室伙食系統 **AIPARC ETA** 的架構與資料契約。
-給人看的專案介紹在根目錄 [`README.md`](../README.md)（[English (UK)](../docs/README.en-GB.md)）；本目錄不重複入門教學。
+給人看的專案介紹在根目錄 [`README.md`](../README.md)（[English](../docs/README.en.md)）；本目錄不重複入門教學。
 
 若規格與程式碼衝突，以程式碼為準，並回頭修正這裡的文件。
 

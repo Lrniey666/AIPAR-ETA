@@ -72,13 +72,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.1] - 2026-09-18
 
-0.2.0 的根目錄 `README.md` 只夠本機啟動。本版把對外說明改成繁中／英式英文兩份對照，安裝與契約細節收到可折疊區塊與既有 `SPEC/`、`DEPLOY.md`。未改應用程式行為、路由或資料契約。
+0.2.0 的根目錄 `README.md` 只夠本機啟動。本版把對外說明改成繁中／英文兩份對照，安裝與契約細節收到可折疊區塊與既有 `SPEC/`、`DEPLOY.md`。未改應用程式行為、路由或資料契約。
 
 ### Added
 
 - 繁體中文專案介紹 `README.md`：Hero、徽章、語言切換、功能、示範、架構、安裝、結構、貢獻與授權。
-- 同一份內容的英式英文 `docs/README.en-GB.md`。
-- 貢獻指南 `CONTRIBUTING.md` 與 `docs/CONTRIBUTING.en-GB.md`，以及說明文件索引 `docs/README.md`。
+- 同一份內容的英文 `docs/README.en.md`。
+- 貢獻指南 `CONTRIBUTING.md` 與 `docs/CONTRIBUTING.en.md`，以及說明文件索引 `docs/README.md`。
 - `docs/assets/`：標誌 SVG，以及 Discord／網站示意 PNG。
 
 ### Changed

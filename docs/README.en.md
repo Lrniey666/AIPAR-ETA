@@ -1,6 +1,6 @@
 <p align="center">
   <a href="../README.md"><img alt="繁體中文" src="https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-259fc8?style=for-the-badge&labelColor=231815"></a>
-  <a href="#readme"><img alt="English (UK)" src="https://img.shields.io/badge/English_(UK)-eabf29?style=for-the-badge&labelColor=231815"></a>
+  <a href="#readme"><img alt="English" src="https://img.shields.io/badge/English-eabf29?style=for-the-badge&labelColor=231815"></a>
 </p>
 
 <p align="center">
@@ -44,7 +44,7 @@ Lunch orders should not live across ten Discord messages. AIPARC ETA keeps resta
 > **Status (0.2.0 + Unreleased).** The three product features shipped in 0.2.0. This round follows `PLAN/AEPARC_EAT_Revise_1.md`: in-repo OCR, plain-language cancel / ledger / recommend, who-owes-whom, conversation memory, anti-hallucination, and a themed dashboard.
 > **77** offline tests, `npm run smoke`, `npm run route:check` and the local website pages have passed. **Live Discord use has not been signed off** (including `/memory`). The command table changed — run `npm run register` after deploy.
 
-English in this project is **British English**. Discord users whose client language is Chinese (Traditional or Simplified) see Traditional Chinese; everyone else sees English.
+English in this project is **English**. Discord users whose client language is Chinese (Traditional or Simplified) see Traditional Chinese; everyone else sees English.
 
 ## Features
 
@@ -341,7 +341,7 @@ Hard rules: unit prices always come from `menu_items`; a matching rule means the
 
 ## Contributing
 
-This is an internal laboratory project. Please read [`CONTRIBUTING.md`](../CONTRIBUTING.md) ([English (UK)](CONTRIBUTING.en-GB.md)) and [`.cursorrules`](../.cursorrules) before editing.
+This is an internal laboratory project. Please read [`CONTRIBUTING.md`](../CONTRIBUTING.md) ([English](CONTRIBUTING.en.md)) and [`.cursorrules`](../.cursorrules) before editing.
 
 In short: `snake_case` for variables and functions; maintainer comments in Traditional Chinese; keep `SPEC/` in sync when contracts change; record notable changes under `CHANGELOG.md` `Unreleased` (Keep a Changelog 2.0.0); `npm run check` must stay green. Do not copy code or architecture from the neighbouring `AIPAR-ordering-system` repository.
 
