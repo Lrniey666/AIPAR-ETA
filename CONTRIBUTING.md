@@ -7,7 +7,7 @@
 ## 動工前
 
 1. 讀 [`.cursorrules`](.cursorrules) 與 [`AGENTS.md`](AGENTS.md) §1–2。
-2. 用 `AGENTS.md` §3 對上這次要改的檔，**不要**一上來掃整個倉庫。
+2. 用 `AGENTS.md` §3 對上這次要改的檔，**不要**一上來掃整個 Repository。
 3. 動到架構、流程、資料契約、路由時，先打開對應的那一份 [`SPEC/`](SPEC/README.md)。
 
 衝突時以程式碼為準，然後回頭修正 SPEC。產品意圖在 [`PLAN/plan_initial.md`](PLAN/plan_initial.md)；這一輪修訂在 [`PLAN/AEPARC_EAT_Revise_1.md`](PLAN/AEPARC_EAT_Revise_1.md)。
@@ -31,7 +31,7 @@
 
 - 在程式碼硬寫金鑰、Token、密碼、絕對機器路徑
 - 提交 `.env`、憑證、備份檔
-- 抄隔壁 `AIPAR-ordering-system` 的程式、套件切分或架構（研究倉 `AIPAR-ordering-system-sesearch` 可以看結論，不是產品倉）
+- 抄隔壁 `AIPAR-ordering-system` 的程式、套件切分或架構（研究 Repository `AIPAR-ordering-system-sesearch` 可以看結論，不是產品 Repository）
 - 拿猜的 LLM 模型 ID 去打 API
 - 為了「比較順」拿掉菜單草稿的人工確認，或讓模型自行定價
 

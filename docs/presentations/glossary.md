@@ -11,7 +11,7 @@
 ### AIPARC ETA（`aiparc-eta`）
 
 - **白話**：這套系統的正式名字，程式與 Docker 也用同一組英文。
-- **概念**：本倉庫的產品識別字。
+- **概念**：本 Repository 的產品識別字。
 - **定義**：npm 套件名、Compose 專案名與對外標題。與規劃別名「AIPARC EAT」同一實驗室識別。
 - **本專案用途**：`package.json` 的 `name`、容器網路 `aiparc-eta-net`、網站 `<title>` 與 Discord Embed 作者名。
 

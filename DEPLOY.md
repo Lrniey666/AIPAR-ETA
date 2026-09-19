@@ -6,7 +6,7 @@
 ## 前置
 
 - Docker Engine 28+（本機驗證時為 29.4.0）與 Compose v2／v5 外掛
-- 倉庫內有已填寫的 `.env`（至少包含 `POSTGRES_DB`、`POSTGRES_USER`、`POSTGRES_PASSWORD`）
+- Repository 內有已填寫的 `.env`（至少包含 `POSTGRES_DB`、`POSTGRES_USER`、`POSTGRES_PASSWORD`）
 - 主機時區建議 `Asia/Taipei`
 - Discord 應用程式：Bot → Privileged Gateway Intents 已打開 **Message Content Intent**
 
